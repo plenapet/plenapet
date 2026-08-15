@@ -31,7 +31,7 @@ Este proyecto usa un **vault de Obsidian como memoria permanente entre sesiones*
 
 ## Estado actual
 
-**Fase 1 en curso.** Repo en `github.com/plenapet/plenapet` (push hecho a `main`) y proyecto de Supabase creado (`rgpowmszbotcwrubguek`), pero **el esquema de Supabase todavía no está aplicado** — el usuario va a pegar `supabase/migrations/0001_init.sql` y `supabase/seed.sql` en el SQL Editor del dashboard. Hasta que eso pase, ambas apps corren sobre datos mock (`packages/database/src/mock`) porque las credenciales en `apps/*/.env.local` están comentadas a propósito. El admin/back-office está incluido desde ya, no diferido, porque PlenaPet lo va a operar un equipo distinto al del dueño. Ver `Plan/Roadmap.md` para el detalle fase por fase y `Pendientes/Preguntas-abiertas.md` para el paso pendiente exacto.
+**Fase 1 en curso.** Repo en `github.com/plenapet/plenapet` (push hecho a `main`) y **Supabase real ya conectado y verificado** (`rgpowmszbotcwrubguek`): esquema + RLS aplicados, seed cargado, ambas apps (`storefront` y `admin`) corriendo contra la base de datos real sin errores. `packages/database` ya no usa el mock por defecto en ninguna de las dos apps — el fallback a mock solo entra si algún día se corre sin `.env.local` configurado (por ejemplo, en una máquina nueva antes de copiar las credenciales). El admin/back-office está incluido desde ya, no diferido, porque PlenaPet lo va a operar un equipo distinto al del dueño. Ver `Plan/Roadmap.md` para el detalle fase por fase.
 
 **Nota de credenciales**: no hay ninguna identidad de git ni credenciales de push guardadas en esta máquina de forma persistente (a propósito, así se decidió). Cualquier push futuro necesita que quien lo haga aporte sus propias credenciales.
 

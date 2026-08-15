@@ -16,7 +16,8 @@ Estado global: **Fase 1 en curso — construcción local con datos mock**, sin S
 - [x] Crear proyecto Supabase (`rgpowmszbotcwrubguek`) — falta aplicar el esquema, ver [[Preguntas-abiertas]].
 - [x] Escribir la migración inicial (`supabase/migrations/0001_init.sql`) y el seed (`supabase/seed.sql`) a partir de [[Modelo-de-datos]] — **pendiente de ejecutar** en el proyecto real.
 - [x] Implementar los repositorios Supabase en `packages/database` detrás de las mismas interfaces que el mock (se activan solos cuando el esquema esté aplicado y las env vars descomentadas).
-- [ ] Crear proyecto/branch de staging en Supabase (separado de producción).
+- [x] **Migración y seed aplicados en el proyecto real de Supabase** (2026-08-15, confirmado por REST API) — `.env.local` de storefront y admin activados, ambas apps verificadas corriendo contra Supabase real sin errores, RLS confirmado bloqueando `vetshipping_raw_catalog` para el rol anon.
+- [ ] Crear proyecto/branch de staging en Supabase (separado de producción) — hoy solo existe el proyecto único, se está usando como si fuera producción/desarrollo a la vez.
 - [ ] Crear dos proyectos en Vercel (storefront, admin) y conectar dominios.
 - [ ] Resolver [[Preguntas-abiertas]] bloqueantes: entidad legal/NIT, dominio, cuenta Wompi (al menos sandbox).
 - [ ] Obtener el archivo vectorial maestro del logo (SVG/AI/EPS) — hoy el sitio corre con un placeholder de marca, ver nota en [[Preguntas-abiertas]].
