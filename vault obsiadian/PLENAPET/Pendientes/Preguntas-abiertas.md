@@ -14,6 +14,9 @@ La migración y el seed se aplicaron en el proyecto real (`rgpowmszbotcwrubguek`
 
 ## Siguiente paso inmediato
 
+- **Configurar variables de entorno en Vercel** para que `plenapet-admin` (y el futuro `plenapet-storefront`) dejen de mostrar datos mock y lean Supabase real: en el dashboard de Vercel → proyecto → Settings → Environment Variables, agregar `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (ambos proyectos) y `SUPABASE_SERVICE_ROLE_KEY` (solo en `plenapet-admin`) — mismos valores que en los `.env.local` locales.
+- **Crear el proyecto `plenapet-storefront` en Vercel** (Root Directory `apps/storefront`), igual que se hizo con `plenapet-admin`.
+- El CLI de Vercel de esta máquina está en una cuenta distinta (`juankana98s-projects`) a la que tiene los proyectos de PlenaPet — la gestión de Vercel se está haciendo desde el dashboard del usuario directamente, no desde este CLI. Ver memoria `plenapet-vercel-account`.
 - Crear un proyecto/branch de **staging** separado en Supabase — hoy solo existe un proyecto y está haciendo de producción y desarrollo a la vez, lo cual es razonable por ahora pero hay que recordar separarlo antes de tener clientes reales.
 - Para futuros push a GitHub desde esta u otra máquina: no hay credenciales guardadas (a propósito), hace falta un token/`gh auth login`/SSH configurado por quien vaya a pushear.
 

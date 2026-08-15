@@ -18,7 +18,10 @@ Estado global: **Fase 1 en curso — construcción local con datos mock**, sin S
 - [x] Implementar los repositorios Supabase en `packages/database` detrás de las mismas interfaces que el mock (se activan solos cuando el esquema esté aplicado y las env vars descomentadas).
 - [x] **Migración y seed aplicados en el proyecto real de Supabase** (2026-08-15, confirmado por REST API) — `.env.local` de storefront y admin activados, ambas apps verificadas corriendo contra Supabase real sin errores, RLS confirmado bloqueando `vetshipping_raw_catalog` para el rol anon.
 - [ ] Crear proyecto/branch de staging en Supabase (separado de producción) — hoy solo existe el proyecto único, se está usando como si fuera producción/desarrollo a la vez.
-- [ ] Crear dos proyectos en Vercel (storefront, admin) y conectar dominios.
+- [x] Proyecto `plenapet-admin` creado y desplegado en Vercel por el usuario directamente desde el dashboard (2026-08-15) — **https://plenapet-admin.vercel.app**, conectado al repo de GitHub. Corre sobre datos mock porque las variables de entorno de Supabase todavía no están configuradas en Vercel (ver [[Preguntas-abiertas]]).
+- [ ] Configurar las variables de entorno de Supabase en el proyecto `plenapet-admin` de Vercel.
+- [ ] Crear y desplegar el proyecto `plenapet-storefront` en Vercel (mismo flujo: Root Directory `apps/storefront`) y configurar sus variables de entorno.
+- [ ] Conectar dominios propios cuando estén definidos (ver [[Preguntas-abiertas]] sobre el dominio de PlenaPet).
 - [ ] Resolver [[Preguntas-abiertas]] bloqueantes: entidad legal/NIT, dominio, cuenta Wompi (al menos sandbox).
 - [ ] Obtener el archivo vectorial maestro del logo (SVG/AI/EPS) — hoy el sitio corre con un placeholder de marca, ver nota en [[Preguntas-abiertas]].
 
