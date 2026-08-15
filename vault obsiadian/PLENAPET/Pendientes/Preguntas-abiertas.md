@@ -8,6 +8,12 @@ actualizado: 2026-08-14
 
 Cosas que bloquean o condicionan el trabajo y que solo Juan Camilo (o su equipo legal/comercial) puede resolver. No asumir respuestas — preguntar cuando se llegue a la tarea que las necesita.
 
+## Siguiente paso inmediato (bloquea usar Supabase en local)
+
+- **Aplicar la migración en el proyecto real de Supabase** (`rgpowmszbotcwrubguek`): abrir el SQL Editor del dashboard, pegar y ejecutar primero `supabase/migrations/0001_init.sql` y después `supabase/seed.sql`. El usuario eligió hacerlo él mismo (ver [[Registro-de-decisiones]], 2026-08-15) para no compartir el password de la base de datos.
+- Una vez aplicada, descomentar las líneas de `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` en `apps/storefront/.env.local` y `apps/admin/.env.local` — con eso el storefront y el admin empiezan a leer de Supabase automáticamente (mismo código, sin cambios).
+- Para futuros push a GitHub desde esta u otra máquina: no hay credenciales guardadas (a propósito), hace falta un token/`gh auth login`/SSH configurado por quien vaya a pushear.
+
 ## Bloqueantes para producción (no para empezar a construir)
 
 - **Entidad legal / NIT de PlenaPet**: para facturación, términos y condiciones, política de tratamiento de datos y la cuenta de Wompi. Debe ser distinta de la razón social visible de VetShipping (independencia de marca + separación de flujos de dinero). ¿Ya existe una sociedad/NIT para PlenaPet o hay que constituirla?

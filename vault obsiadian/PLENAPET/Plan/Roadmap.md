@@ -12,12 +12,14 @@ Estado global: **Fase 1 en curso — construcción local con datos mock**, sin S
 
 - [x] Scaffold del monorepo (pnpm workspaces + Turborepo) — `apps/storefront`, `apps/admin`, `packages/ui`, `packages/database`, `packages/config`.
 - [x] Design system base (tokens de color/tipografía de [[Resumen-marca]]) implementado en `packages/ui` + preset de Tailwind compartido.
-- [ ] Crear repositorio en GitHub y hacer el primer push (pendiente, se hace después de esta ronda de construcción local).
-- [ ] Crear proyecto Supabase (producción) + proyecto/branch de staging.
+- [x] Crear repositorio en GitHub (`github.com/plenapet/plenapet`) y hacer el primer push (2026-08-15).
+- [x] Crear proyecto Supabase (`rgpowmszbotcwrubguek`) — falta aplicar el esquema, ver [[Preguntas-abiertas]].
+- [x] Escribir la migración inicial (`supabase/migrations/0001_init.sql`) y el seed (`supabase/seed.sql`) a partir de [[Modelo-de-datos]] — **pendiente de ejecutar** en el proyecto real.
+- [x] Implementar los repositorios Supabase en `packages/database` detrás de las mismas interfaces que el mock (se activan solos cuando el esquema esté aplicado y las env vars descomentadas).
+- [ ] Crear proyecto/branch de staging en Supabase (separado de producción).
 - [ ] Crear dos proyectos en Vercel (storefront, admin) y conectar dominios.
 - [ ] Resolver [[Preguntas-abiertas]] bloqueantes: entidad legal/NIT, dominio, cuenta Wompi (al menos sandbox).
 - [ ] Obtener el archivo vectorial maestro del logo (SVG/AI/EPS) — hoy el sitio corre con un placeholder de marca, ver nota en [[Preguntas-abiertas]].
-- [ ] Migraciones iniciales de base de datos a partir de [[Modelo-de-datos]] (cuando se conecte Supabase).
 
 ## Fase 1 — MVP
 

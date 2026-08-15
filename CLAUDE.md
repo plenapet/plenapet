@@ -31,7 +31,9 @@ Este proyecto usa un **vault de Obsidian como memoria permanente entre sesiones*
 
 ## Estado actual
 
-**Fase 1 en curso — monorepo construido y corriendo en local con datos mock**, sin Supabase todavía (a propósito: primero se valida la experiencia completa, después se conecta infraestructura). El admin/back-office está incluido desde ya, no diferido, porque PlenaPet lo va a operar un equipo distinto al del dueño. Ver `Plan/Roadmap.md` para el detalle fase por fase y el checklist vivo.
+**Fase 1 en curso.** Repo en `github.com/plenapet/plenapet` (push hecho a `main`) y proyecto de Supabase creado (`rgpowmszbotcwrubguek`), pero **el esquema de Supabase todavía no está aplicado** — el usuario va a pegar `supabase/migrations/0001_init.sql` y `supabase/seed.sql` en el SQL Editor del dashboard. Hasta que eso pase, ambas apps corren sobre datos mock (`packages/database/src/mock`) porque las credenciales en `apps/*/.env.local` están comentadas a propósito. El admin/back-office está incluido desde ya, no diferido, porque PlenaPet lo va a operar un equipo distinto al del dueño. Ver `Plan/Roadmap.md` para el detalle fase por fase y `Pendientes/Preguntas-abiertas.md` para el paso pendiente exacto.
+
+**Nota de credenciales**: no hay ninguna identidad de git ni credenciales de push guardadas en esta máquina de forma persistente (a propósito, así se decidió). Cualquier push futuro necesita que quien lo haga aporte sus propias credenciales.
 
 ```bash
 pnpm install
