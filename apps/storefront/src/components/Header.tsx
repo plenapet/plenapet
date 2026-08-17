@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Container, Logo } from "@plenapet/ui";
 import { useCartStore, cartItemCount } from "@/lib/cart-store";
 
@@ -14,9 +15,46 @@ const NAV_LINKS = [
   { href: "/productos?categoria=accesorios", label: "Accesorios" },
 ];
 
+function SearchForm({
+  className = "",
+  onSubmit,
+}: {
+  className?: string;
+  onSubmit?: () => void;
+}) {
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+
+  return (
+    <form
+      className={className}
+      onSubmit={(e) => {
+        e.preventDefault();
+        const params = new URLSearchParams();
+        if (query.trim()) params.set("q", query.trim());
+        router.push(`/productos?${params.toString()}`);
+        onSubmit?.();
+      }}
+    >
+      <label className="sr-only" htmlFor="buscar-productos">
+        Buscar productos
+      </label>
+      <input
+        id="buscar-productos"
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Busca alimentos, marcas, referencias..."
+        className="w-full rounded-full border border-azul-confianza/15 bg-white px-4 py-2 text-sm text-azul-confianza placeholder:text-gris-pizarra/50 focus:border-azul-confianza/40 focus:outline-none"
+      />
+    </form>
+  );
+}
+
 export function Header() {
   const items = useCartStore((s) => s.items);
   const [mounted, setMounted] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
@@ -25,9 +63,10 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-azul-confianza/10 bg-white/90 backdrop-blur">
       <Container className="flex h-16 items-center justify-between gap-6">
-        <Link href="/">
+        <Link href="/" onClick={() => setMenuOpen(false)}>
           <Logo />
         </Link>
+
         <nav className="hidden flex-1 items-center gap-5 overflow-x-auto text-sm font-medium text-gris-pizarra lg:flex">
           {NAV_LINKS.map((link) => (
             <Link
@@ -39,13 +78,10 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-4">
-          <Link
-            href="/productos"
-            className="hidden text-sm font-medium text-gris-pizarra hover:text-azul-confianza sm:block"
-          >
-            Buscar
-          </Link>
+
+        <SearchForm className="hidden w-64 shrink-0 lg:block" />
+
+        <div className="flex items-center gap-3">
           <Link
             href="/carrito"
             className="relative inline-flex items-center rounded-full bg-azul-confianza px-4 py-2 text-sm font-semibold text-white"
@@ -57,8 +93,45 @@ export function Header() {
               </span>
             )}
           </Link>
+          <button
+            type="button"
+            aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((v) => !v)}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-azul-confianza/15 text-azul-confianza lg:hidden"
+          >
+            {menuOpen ? (
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                <path d="M1 1l16 16M17 1L1 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden="true">
+                <path d="M0 1h18M0 7h18M0 13h18" stroke="currentColor" strokeWidth="2" />
+              </svg>
+            )}
+          </button>
         </div>
       </Container>
+
+      {menuOpen && (
+        <div className="border-t border-azul-confianza/10 bg-white lg:hidden">
+          <Container className="space-y-4 py-4">
+            <SearchForm onSubmit={() => setMenuOpen(false)} />
+            <nav className="flex flex-col divide-y divide-azul-confianza/5 text-sm font-medium text-gris-pizarra">
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="py-2.5 transition-colors hover:text-azul-confianza"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </Container>
+        </div>
+      )}
     </header>
   );
 }

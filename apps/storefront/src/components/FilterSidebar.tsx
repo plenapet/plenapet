@@ -1,6 +1,7 @@
 import type { Brand, Category } from "@plenapet/database";
 
 type Filters = {
+  q?: string;
   categoria?: string;
   especie?: string;
   etapa?: string;
@@ -17,11 +18,26 @@ export function FilterSidebar({
   brands: Brand[];
   filters: Filters;
 }) {
+  const hasFilters = Object.values(filters).some(Boolean);
+
   return (
     <form
       method="get"
       className="space-y-6 rounded-card border border-azul-confianza/10 bg-white p-5 shadow-card"
     >
+      <div>
+        <label className="text-xs font-semibold uppercase tracking-wide text-gris-pizarra">
+          Buscar
+        </label>
+        <input
+          type="search"
+          name="q"
+          placeholder="Nombre del producto"
+          defaultValue={filters.q ?? ""}
+          className="mt-2 w-full rounded-lg border border-azul-confianza/15 px-3 py-2 text-sm"
+        />
+      </div>
+
       <div>
         <label className="text-xs font-semibold uppercase tracking-wide text-gris-pizarra">
           Categoría
@@ -102,12 +118,22 @@ export function FilterSidebar({
         />
       </div>
 
-      <button
-        type="submit"
-        className="w-full rounded-full bg-azul-confianza py-2.5 text-sm font-semibold text-white"
-      >
-        Filtrar
-      </button>
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          className="flex-1 rounded-full bg-azul-confianza py-2.5 text-sm font-semibold text-white"
+        >
+          Filtrar
+        </button>
+        {hasFilters && (
+          <a
+            href="/productos"
+            className="text-sm font-medium text-gris-pizarra hover:text-coral-cercania"
+          >
+            Limpiar
+          </a>
+        )}
+      </div>
     </form>
   );
 }
