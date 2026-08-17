@@ -8,6 +8,22 @@ actualizado: 2026-08-14
 
 Formato: fecha · decisión · razón · quién la tomó. Agregar entradas nuevas al final, nunca borrar histórico (si una decisión se revierte, se agrega una entrada nueva que referencia la anterior).
 
+## 2026-08-17 — Bug real encontrado al probar: falta fila en `profiles` para usuarios pre-existentes
+
+Primer bug encontrado por el usuario probando de verdad: al crear una mascota, `insert or update on table "pets" violates foreign key constraint "pets_customer_id_fkey"`.
+
+**Causa**: el trigger `handle_new_user` (migración 0003) solo corre para usuarios **nuevos** de `auth.users`. El usuario de prueba (`juancamilo965@gmail.com`) se había creado *antes* de que existiera ese trigger (cuando se dio de alta como admin) — se quedó sin fila en `profiles`, y `pets.customer_id` referencia `profiles.id`.
+
+**Arreglo inmediato**: se insertó manualmente la fila faltante en `profiles` vía REST con `service_role` (no requirió migración, fue un fix de datos puntual).
+
+**Arreglo estructural** (para que no le pase a nadie más): 
+- Migración `0005_profiles_insert_policy.sql` — agrega policy de INSERT en `profiles` (`auth.uid() = id`), que faltaba (0001 solo tenía SELECT y UPDATE).
+- `app/health/layout.tsx` ahora hace un `upsert` defensivo de la propia fila de `profiles` en cada carga de `/health/*` (con `ignoreDuplicates: true`, así que no pisa datos si ya existe) — respaldo del trigger para cualquier caso borde futuro.
+
+**Pendiente**: aplicar `0005_profiles_insert_policy.sql` en el SQL Editor.
+
+**De paso**, el usuario pidió que "raza" fuera un selector en vez de texto libre para evitar errores de escritura. Se agregó `packages/database/src/breeds.ts` (catálogo de razas comunes de perro/gato + "Otra" con texto libre como salida) y `NewPetForm.tsx` (client component: el selector de raza cambia según la especie elegida).
+
 ## 2026-08-17 — Lección aprendida: nunca comparar slug de URL contra id
 
 Al construir los filtros de categoría/marca del catálogo público y "productos relacionados", se comparó directamente el slug que viene en la URL (`?categoria=desparasitantes`) contra `product.categoryId`. En el mock de desarrollo esto "funcionaba" por coincidencia (el id de cada categoría mock se definió igual a su slug), pero en Supabase real `categoryId`/`brandId` son UUID — la comparación nunca daba match y filtrar por categoría o marca devolvía cero resultados en producción, sin error visible, solo un catálogo vacío.
