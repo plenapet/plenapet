@@ -16,6 +16,16 @@ Al construir los filtros de categoría/marca del catálogo público y "productos
 
 **Por qué importa**: es la clase de bug que el mock no detecta pero sí un backend real, y no lanza excepción — silenciosamente muestra "0 resultados". Cualquier función nueva de filtrado/búsqueda debe probarse contra Supabase real, no solo contra el mock, antes de darse por terminada.
 
+## 2026-08-17 — Fusión de storefront y admin en una sola app
+
+El usuario preguntó por qué había dos proyectos de Vercel separados (storefront y admin) si conceptualmente es "una única página con un módulo administrativo". Se le explicaron las razones originales de separarlos (aislar la llave `service_role`, que el público no encuentre el login del equipo, deploys independientes) pero también que **no es la única arquitectura válida**: para el tamaño actual del equipo y del panel, una sola app con `/admin` protegido por login es una alternativa razonable y más simple de operar. El usuario eligió explícitamente unificar.
+
+**Cambio hecho**: se movió todo `apps/admin` a `apps/storefront/src/app/admin/`, y `apps/admin` se eliminó del repo. Detalle técnico completo en [[Arquitectura-tecnica]] (sección "Autenticación y roles").
+
+**Efecto colateral positivo obligado por el cambio**: como `/admin` ahora vive en el mismo dominio público que la tienda (antes estaba en un proyecto de Vercel distinto, con una URL separada — tampoco era seguridad real, pero sí un obstáculo adicional), se implementó de una vez **autenticación real** con Supabase Auth + `@supabase/ssr` en vez de dejar el login como UI de mentira. Antes de este cambio, el checklist de Fase 1 tenía "Autenticación de equipo vía Supabase Auth" como pendiente — se adelantó porque dejar `/admin` completamente abierto en el dominio público habría sido un hueco de seguridad real, no solo una tarea pendiente más.
+
+**Pendiente para el usuario**: crear el primer usuario admin manualmente (Supabase Auth → Authentication → Add User) e insertar su fila en `admin_users` con `active = true` — ver [[Preguntas-abiertas]]. También hay que decidir qué hacer con el proyecto `plenapet-admin` en Vercel (ya no se usa; se puede borrar o dejarlo inactivo) y aplicar la migración `0002_admin_users_self_read.sql` pendiente.
+
 ## 2026-08-14 — Alcance y marca
 
 - **PlenaPet es B2C**, se abastece del inventario de VetShipping (B2B, del mismo dueño) pero debe operar como marca independiente: dominio, redes, WhatsApp, CRM y servicio al cliente propios; sin co-branding ni referencias visuales/textuales cruzadas. Fuente: Manual Interno de Marca v1.0 + instrucción explícita del usuario.

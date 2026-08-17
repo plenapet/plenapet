@@ -23,24 +23,26 @@ Este proyecto usa un **vault de Obsidian como memoria permanente entre sesiones*
 
 ## Resumen ejecutivo del stack (detalle completo en el vault)
 
-- **Frontend**: Next.js (App Router) + TypeScript + Tailwind + shadcn/ui, dos apps — `storefront` (B2C) y `admin` (back-office) — en un monorepo.
+- **Frontend**: Next.js (App Router) + TypeScript + Tailwind + shadcn/ui, **una sola app** (`apps/storefront`) con la tienda pública en `(storefront)` y el panel interno en `/admin`, protegido por login — no dos apps separadas (se evaluó y se descartó, ver el registro de decisiones del 2026-08-17).
 - **Backend**: Supabase (Postgres + Auth + Storage + Edge Functions + `pg_cron`), proyecto **propio e independiente** del que use VetShipping.
 - **Pagos**: Wompi, widget embebido + webhook como fuente de verdad del estado de pago.
-- **Hosting**: Vercel (dos proyectos, uno por app). **Repo**: GitHub, monorepo.
+- **Hosting**: Vercel (un solo proyecto). **Repo**: GitHub, monorepo.
 - **Integración con VetShipping**: patrón adapter desacoplado, sync server-to-server (nunca en tiempo de request del cliente), empezando por un adapter de archivo (CSV) porque el mecanismo definitivo (API/BD/archivo) aún no está decidido por el usuario.
 
 ## Estado actual
 
-**Fase 1 en curso.** Repo en `github.com/plenapet/plenapet` (push hecho a `main`) y **Supabase real ya conectado y verificado** (`rgpowmszbotcwrubguek`): esquema + RLS aplicados, seed cargado, ambas apps (`storefront` y `admin`) corriendo contra la base de datos real sin errores. `packages/database` ya no usa el mock por defecto en ninguna de las dos apps — el fallback a mock solo entra si algún día se corre sin `.env.local` configurado (por ejemplo, en una máquina nueva antes de copiar las credenciales). El admin/back-office está incluido desde ya, no diferido, porque PlenaPet lo va a operar un equipo distinto al del dueño. Ver `Plan/Roadmap.md` para el detalle fase por fase.
+**Fase 1 en curso.** Repo en `github.com/plenapet/plenapet` (push hecho a `main`) y **Supabase real conectado y verificado** (`rgpowmszbotcwrubguek`): esquema + RLS aplicados, seed cargado. `packages/database` ya no usa el mock por defecto — el fallback a mock solo entra si se corre sin `.env.local` configurado.
+
+**`/admin` tiene autenticación real** (Supabase Auth vía `@supabase/ssr` + `middleware.ts` + chequeo de `admin_users` en el layout del panel) — no es un placeholder. Falta que el usuario aplique `supabase/migrations/0002_admin_users_self_read.sql` y cree el primer usuario admin (pasos exactos en `Pendientes/Preguntas-abiertas.md`).
 
 **Nota de credenciales**: no hay ninguna identidad de git ni credenciales de push guardadas en esta máquina de forma persistente (a propósito, así se decidió). Cualquier push futuro necesita que quien lo haga aporte sus propias credenciales.
 
 ```bash
 pnpm install
-pnpm dev              # storefront en :3000, admin en :3001
+pnpm dev   # http://localhost:3000 — tienda en /, panel interno en /admin
 ```
 
-`packages/database` expone repositorios (`getProductRepository()`, etc.) que hoy devuelven una implementación **mock en memoria** (`packages/database/src/mock`, ~24 productos semilla). Storefront y admin solo conocen las interfaces — cuando se conecte Supabase, se cambia la implementación en un único punto (`packages/database/src/index.ts`) sin tocar el resto del código. Mismo patrón que el adapter de VetShipping.
+`packages/database` expone repositorios (`getProductRepository()`, etc.) que usan Supabase real cuando hay `.env.local`, con fallback automático a una implementación **mock en memoria** (`packages/database/src/mock`, ~24 productos semilla) si no lo hay. El código de las páginas solo conoce las interfaces — mismo patrón que el adapter de VetShipping.
 
 **Placeholders activos a reemplazar antes de cualquier entrega real** (ambos marcados con `TODO`/comentarios explícitos en el código): el logo (`packages/ui/src/components/Logo.tsx`, a la espera del archivo vectorial oficial) y las imágenes de producto (hoy son cajas con el nombre en texto, a la espera de fotografía real de empaque).
 

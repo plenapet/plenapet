@@ -10,7 +10,7 @@ Estado global: **Fase 1 en curso — construcción local con datos mock**, sin S
 
 ## Fase 0 — Fundaciones (setup)
 
-- [x] Scaffold del monorepo (pnpm workspaces + Turborepo) — `apps/storefront`, `apps/admin`, `packages/ui`, `packages/database`, `packages/config`.
+- [x] Scaffold del monorepo (pnpm workspaces + Turborepo) — `apps/storefront` (tienda + `/admin`), `packages/ui`, `packages/database`, `packages/config`. *(Originalmente `apps/admin` era una app separada; se fusionó el 2026-08-17, ver [[Registro-de-decisiones]]).*
 - [x] Design system base (tokens de color/tipografía de [[Resumen-marca]]) implementado en `packages/ui` + preset de Tailwind compartido.
 - [x] Crear repositorio en GitHub (`github.com/plenapet/plenapet`) y hacer el primer push (2026-08-15).
 - [x] Crear proyecto Supabase (`rgpowmszbotcwrubguek`) — falta aplicar el esquema, ver [[Preguntas-abiertas]].
@@ -18,9 +18,8 @@ Estado global: **Fase 1 en curso — construcción local con datos mock**, sin S
 - [x] Implementar los repositorios Supabase en `packages/database` detrás de las mismas interfaces que el mock (se activan solos cuando el esquema esté aplicado y las env vars descomentadas).
 - [x] **Migración y seed aplicados en el proyecto real de Supabase** (2026-08-15, confirmado por REST API) — `.env.local` de storefront y admin activados, ambas apps verificadas corriendo contra Supabase real sin errores, RLS confirmado bloqueando `vetshipping_raw_catalog` para el rol anon.
 - [ ] Crear proyecto/branch de staging en Supabase (separado de producción) — hoy solo existe el proyecto único, se está usando como si fuera producción/desarrollo a la vez.
-- [x] Proyecto `plenapet-admin` creado y desplegado en Vercel por el usuario directamente desde el dashboard (2026-08-15) — **https://plenapet-admin.vercel.app**, conectado al repo de GitHub. Corre sobre datos mock porque las variables de entorno de Supabase todavía no están configuradas en Vercel (ver [[Preguntas-abiertas]]).
-- [ ] Configurar las variables de entorno de Supabase en el proyecto `plenapet-admin` de Vercel.
-- [ ] Crear y desplegar el proyecto `plenapet-storefront` en Vercel (mismo flujo: Root Directory `apps/storefront`) y configurar sus variables de entorno.
+- [x] ~~Proyecto `plenapet-admin` creado y desplegado en Vercel~~ (2026-08-15) — **obsoleto desde la fusión del 2026-08-17**, ver [[Preguntas-abiertas]] sobre qué hacer con ese proyecto ahora.
+- [ ] Desplegar el proyecto único (`apps/storefront`, tienda + `/admin`) en Vercel y configurar sus variables de entorno (incluye `SUPABASE_SERVICE_ROLE_KEY`, que antes solo vivía en el admin separado).
 - [ ] Conectar dominios propios cuando estén definidos (ver [[Preguntas-abiertas]] sobre el dominio de PlenaPet).
 - [ ] Resolver [[Preguntas-abiertas]] bloqueantes: entidad legal/NIT, dominio, cuenta Wompi (al menos sandbox).
 - [ ] Obtener el archivo vectorial maestro del logo (SVG/AI/EPS) — hoy el sitio corre con un placeholder de marca, ver nota en [[Preguntas-abiertas]].
@@ -41,21 +40,21 @@ Objetivo: tienda funcional de punta a punta + panel de administración operable 
 - [ ] Páginas legales (T&C, política de datos, garantías) — contenido pendiente de la entidad legal real, ver [[Preguntas-abiertas]].
 - [ ] Fotografía real de producto (hoy placeholders de texto, ver [[Preguntas-abiertas]]).
 
-**Admin** (`apps/admin`, corre en `localhost:3001`)
+**Admin** (`apps/storefront/src/app/admin`, sección `/admin` de la misma app — fusionada el 2026-08-17, ver [[Registro-de-decisiones]])
 - [x] Layout con sidebar/topbar y navegación (Dashboard, Catálogo, Pedidos).
-- [x] Dashboard con métricas básicas (productos activos, bajo stock, agotados, pedidos pendientes, ventas) sobre datos mock.
+- [x] Dashboard con métricas básicas (productos activos, bajo stock, agotados, pedidos pendientes, ventas).
 - [x] Vista de catálogo (solo lectura por ahora) con marca, categoría, precio, stock y si requiere fórmula.
 - [x] Vista de pedidos (datos de demostración).
-- [x] Pantalla de login — **UI únicamente, sin autenticación real todavía**.
-- [ ] Autenticación de equipo + roles (`super_admin`, `catalog_manager`, `order_manager`, `support`) vía Supabase Auth.
-- [ ] Curaduría de catálogo editable (publicar/ocultar, nombre/descripción/imágenes, márgenes) — hoy es de solo lectura porque no hay dónde persistir los cambios sin base de datos.
+- [x] **Autenticación real** con Supabase Auth (`@supabase/ssr`) — `middleware.ts` protege todo `/admin/*` excepto `/admin/login`; el layout del panel además exige una fila activa en `admin_users`. Falta crear el primer usuario admin (ver [[Preguntas-abiertas]]).
+- [ ] Roles diferenciados (`super_admin`, `catalog_manager`, `order_manager`, `support`) — hoy solo se valida `active`, no el rol específico.
+- [ ] Curaduría de catálogo editable (publicar/ocultar, nombre/descripción/imágenes, márgenes) — hoy es de solo lectura porque no hay UI de edición todavía (la base de datos ya lo soporta vía `product_overrides`/`pricing_rules`).
 - [ ] Botón "Sincronizar catálogo" conectado al adapter real (hoy está deshabilitado en la UI).
 
 **Diseño**
-- [x] Tokens de marca (color/tipografía) aplicados consistentemente en ambas apps vía `packages/ui`.
+- [x] Tokens de marca (color/tipografía) aplicados consistentemente en toda la app vía `packages/ui`.
 - [ ] QA de marca completo contra el checklist de [[Resumen-marca]] — pendiente hasta tener el logo real y fotografía de producto real (hoy hay placeholders marcados con `TODO` en el código).
 
-**Siguiente paso concreto**: conectar Supabase (schema de [[Modelo-de-datos]], RLS) y reemplazar las implementaciones `Mock*Repository` de `packages/database` por implementaciones Supabase detrás de la misma interfaz — el resto del código (páginas, componentes) no debería necesitar cambios por ese swap.
+**Siguiente paso concreto**: crear el primer usuario admin (ver [[Preguntas-abiertas]]) y decidir qué hacer con el proyecto `plenapet-admin` de Vercel, que quedó obsoleto tras la fusión.
 
 ## Fase 2 — Crecimiento
 
