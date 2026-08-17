@@ -4,7 +4,14 @@ import { getIrisStage, getServiceSupabaseClient, healthSystemLabel } from "@plen
 import { Badge } from "@plenapet/ui";
 import { Topbar } from "@/components/admin/Topbar";
 import { AddLabResultForm } from "@/components/admin/AddLabResultForm";
-import { deleteLabResultAction, publishLabPanelAction } from "@/lib/actions/admin-health";
+import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
+import { getCurrentAdmin } from "@/lib/auth/require-admin";
+import {
+  deleteLabPanelAction,
+  deleteLabResultAction,
+  publishLabPanelAction,
+  unpublishLabPanelAction,
+} from "@/lib/actions/admin-health";
 
 export default async function PanelPage({
   params,
@@ -12,6 +19,8 @@ export default async function PanelPage({
   params: { petId: string; panelId: string };
 }) {
   const supabase = getServiceSupabaseClient();
+  const currentAdmin = await getCurrentAdmin();
+  const isSuperAdmin = currentAdmin?.role === "super_admin";
 
   const [{ data: pet }, { data: panel }, { data: results }] = await Promise.all([
     supabase.from("pets").select("id, name, species").eq("id", params.petId).maybeSingle(),
@@ -61,18 +70,45 @@ export default async function PanelPage({
               </p>
             )}
           </div>
-          {panel.status === "draft" && (
-            <form action={publishLabPanelAction}>
-              <input type="hidden" name="petId" value={pet.id} />
-              <input type="hidden" name="labPanelId" value={panel.id} />
-              <button
-                type="submit"
-                className="rounded-full bg-azul-confianza px-4 py-2 text-sm font-semibold text-white"
-              >
-                Publicar al propietario
-              </button>
-            </form>
-          )}
+          <div className="flex flex-wrap items-center gap-3">
+            {panel.status === "draft" ? (
+              <form action={publishLabPanelAction}>
+                <input type="hidden" name="petId" value={pet.id} />
+                <input type="hidden" name="labPanelId" value={panel.id} />
+                <button
+                  type="submit"
+                  className="rounded-full bg-azul-confianza px-4 py-2 text-sm font-semibold text-white"
+                >
+                  Publicar al propietario
+                </button>
+              </form>
+            ) : (
+              isSuperAdmin && (
+                <form action={unpublishLabPanelAction}>
+                  <input type="hidden" name="petId" value={pet.id} />
+                  <input type="hidden" name="labPanelId" value={panel.id} />
+                  <ConfirmSubmitButton
+                    confirmMessage="El propietario dejará de ver este panel hasta que lo publiques de nuevo. ¿Despublicar para corregirlo?"
+                    className="rounded-full border border-azul-confianza/20 px-4 py-2 text-sm font-semibold text-azul-confianza"
+                  >
+                    Despublicar para editar (super_admin)
+                  </ConfirmSubmitButton>
+                </form>
+              )
+            )}
+            {isSuperAdmin && (
+              <form action={deleteLabPanelAction}>
+                <input type="hidden" name="petId" value={pet.id} />
+                <input type="hidden" name="labPanelId" value={panel.id} />
+                <ConfirmSubmitButton
+                  confirmMessage="¿Eliminar este panel completo y todos sus analitos? Esta acción no se puede deshacer."
+                  className="text-xs font-semibold text-coral-cercania hover:underline"
+                >
+                  Eliminar panel (super_admin)
+                </ConfirmSubmitButton>
+              </form>
+            )}
+          </div>
         </div>
 
         <div className="overflow-x-auto rounded-card border border-azul-confianza/10 bg-white shadow-card">

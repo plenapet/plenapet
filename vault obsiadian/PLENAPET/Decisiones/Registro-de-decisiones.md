@@ -8,6 +8,16 @@ actualizado: 2026-08-14
 
 Formato: fecha · decisión · razón · quién la tomó. Agregar entradas nuevas al final, nunca borrar histórico (si una decisión se revierte, se agrega una entrada nueva que referencia la anterior).
 
+## 2026-08-17 — Primeros roles diferenciados en /admin: super_admin para lo destructivo
+
+Se cerraron los huecos de administración de PlenaPet Health que el usuario pidió completar: editar/borrar mascota, editar/borrar recomendaciones, despublicar/borrar un panel de laboratorio ya publicado, y ver el historial completo de encuestas de bienestar (con cada pregunta y la respuesta elegida, agrupado por sistema).
+
+**Interpretación concreta de "roles diferenciados"** (`admin_users.role` existía en el esquema desde el inicio pero nada lo usaba): en vez de construir una matriz de permisos completa por rol de una vez, se aplicó la regla más simple y de mayor impacto — **cualquier admin activo puede crear/ver/agregar/publicar; solo `super_admin` puede hacer lo destructivo o lo que revierte algo que el propietario ya podía estar viendo** (borrar mascota, despublicar o borrar un panel, borrar una recomendación). `getCurrentAdmin()` en `require-admin.ts` lee el rol para ocultar esos botones en la UI a quien no es super_admin; `requireSuperAdminUserId()` es la verificación real del lado del servidor (nunca confiar solo en que la UI los oculte). Roles diferenciados más finos (`catalog_manager`, `order_manager`, `support` con permisos propios) quedan para cuando haya más de un admin y se necesite de verdad.
+
+Se agregó `ConfirmSubmitButton` (client component con `window.confirm`) como patrón reutilizable para cualquier acción destructiva futura — no hay sistema de modales todavía, esto es la versión más simple que funciona.
+
+No hizo falta ninguna migración nueva: todas estas operaciones ya corrían con `service_role` (que ignora RLS), igual que crear/publicar.
+
 ## 2026-08-17 — Bug real encontrado al probar: falta fila en `profiles` para usuarios pre-existentes
 
 Primer bug encontrado por el usuario probando de verdad: al crear una mascota, `insert or update on table "pets" violates foreign key constraint "pets_customer_id_fkey"`.

@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { getServiceSupabaseClient } from "@plenapet/database";
-import { requireAdminUserId } from "@/lib/auth/require-admin";
+import { requireAdminUserId, requireSuperAdminUserId } from "@/lib/auth/require-admin";
 
 export async function createLabPanelAction(formData: FormData) {
   await requireAdminUserId();
@@ -86,6 +86,33 @@ export async function publishLabPanelAction(formData: FormData) {
   redirect(`/admin/salud/${petId}`);
 }
 
+/** Solo super_admin: un panel publicado vuelve a borrador (el dueño deja de verlo) para poder corregirlo. */
+export async function unpublishLabPanelAction(formData: FormData) {
+  await requireSuperAdminUserId();
+  const petId = String(formData.get("petId") ?? "");
+  const labPanelId = String(formData.get("labPanelId") ?? "");
+
+  const supabase = getServiceSupabaseClient();
+  await supabase
+    .from("lab_panels")
+    .update({ status: "draft", published_at: null })
+    .eq("id", labPanelId);
+
+  redirect(`/admin/salud/${petId}/panel/${labPanelId}`);
+}
+
+/** Solo super_admin: borra el panel completo (los analitos se borran en cascada). */
+export async function deleteLabPanelAction(formData: FormData) {
+  await requireSuperAdminUserId();
+  const petId = String(formData.get("petId") ?? "");
+  const labPanelId = String(formData.get("labPanelId") ?? "");
+
+  const supabase = getServiceSupabaseClient();
+  await supabase.from("lab_panels").delete().eq("id", labPanelId);
+
+  redirect(`/admin/salud/${petId}`);
+}
+
 export async function addHealthRecommendationAction(formData: FormData) {
   await requireAdminUserId();
   const petId = String(formData.get("petId") ?? "");
@@ -106,4 +133,76 @@ export async function addHealthRecommendationAction(formData: FormData) {
   }
 
   redirect(`/admin/salud/${petId}`);
+}
+
+export async function updateHealthRecommendationAction(formData: FormData) {
+  await requireAdminUserId();
+  const petId = String(formData.get("petId") ?? "");
+  const recommendationId = String(formData.get("recommendationId") ?? "");
+
+  const supabase = getServiceSupabaseClient();
+  const relatedProductId = String(formData.get("relatedProductId") ?? "").trim();
+  const { error } = await supabase
+    .from("health_recommendations")
+    .update({
+      title: String(formData.get("title") ?? "").trim(),
+      description: String(formData.get("description") ?? "").trim() || null,
+      severity: String(formData.get("severity") ?? "info"),
+      related_product_id: relatedProductId || null,
+    })
+    .eq("id", recommendationId);
+
+  if (error) {
+    redirect(`/admin/salud/${petId}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect(`/admin/salud/${petId}`);
+}
+
+/** Solo super_admin: quita una recomendación que ya podía estar visible para el dueño. */
+export async function deleteHealthRecommendationAction(formData: FormData) {
+  await requireSuperAdminUserId();
+  const petId = String(formData.get("petId") ?? "");
+  const recommendationId = String(formData.get("recommendationId") ?? "");
+
+  const supabase = getServiceSupabaseClient();
+  await supabase.from("health_recommendations").delete().eq("id", recommendationId);
+
+  redirect(`/admin/salud/${petId}`);
+}
+
+export async function updatePetAction(formData: FormData) {
+  await requireAdminUserId();
+  const petId = String(formData.get("petId") ?? "");
+
+  const supabase = getServiceSupabaseClient();
+  const { error } = await supabase
+    .from("pets")
+    .update({
+      name: String(formData.get("name") ?? "").trim(),
+      species: String(formData.get("species") ?? "perro"),
+      breed: String(formData.get("breed") ?? "").trim() || null,
+      sex: String(formData.get("sex") ?? "") || null,
+      sterilized: formData.get("sterilized") === "on",
+      birth_date: String(formData.get("birthDate") ?? "") || null,
+      weight_kg: formData.get("weightKg") ? Number(formData.get("weightKg")) : null,
+    })
+    .eq("id", petId);
+
+  if (error) {
+    redirect(`/admin/salud/${petId}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect(`/admin/salud/${petId}`);
+}
+
+/** Solo super_admin: borra la mascota y, en cascada, sus encuestas, paneles y recomendaciones. */
+export async function deletePetAction(formData: FormData) {
+  await requireSuperAdminUserId();
+  const petId = String(formData.get("petId") ?? "");
+
+  const supabase = getServiceSupabaseClient();
+  await supabase.from("pets").delete().eq("id", petId);
+
+  redirect("/admin/salud");
 }
