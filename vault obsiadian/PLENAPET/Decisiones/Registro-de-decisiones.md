@@ -8,6 +8,14 @@ actualizado: 2026-08-14
 
 Formato: fecha · decisión · razón · quién la tomó. Agregar entradas nuevas al final, nunca borrar histórico (si una decisión se revierte, se agrega una entrada nueva que referencia la anterior).
 
+## 2026-08-17 — Lección aprendida: nunca comparar slug de URL contra id
+
+Al construir los filtros de categoría/marca del catálogo público y "productos relacionados", se comparó directamente el slug que viene en la URL (`?categoria=desparasitantes`) contra `product.categoryId`. En el mock de desarrollo esto "funcionaba" por coincidencia (el id de cada categoría mock se definió igual a su slug), pero en Supabase real `categoryId`/`brandId` son UUID — la comparación nunca daba match y filtrar por categoría o marca devolvía cero resultados en producción, sin error visible, solo un catálogo vacío.
+
+**Regla a partir de ahora**: cualquier filtro que llegue como slug desde la URL o un formulario debe resolverse primero a su `id` real (buscándolo en la lista de categorías/marcas ya cargada) antes de comparar contra los campos `categoryId`/`brandId` de un producto. Nunca comparar slug contra id directamente, ni asumir que coinciden solo porque el mock los hizo iguales.
+
+**Por qué importa**: es la clase de bug que el mock no detecta pero sí un backend real, y no lanza excepción — silenciosamente muestra "0 resultados". Cualquier función nueva de filtrado/búsqueda debe probarse contra Supabase real, no solo contra el mock, antes de darse por terminada.
+
 ## 2026-08-14 — Alcance y marca
 
 - **PlenaPet es B2C**, se abastece del inventario de VetShipping (B2B, del mismo dueño) pero debe operar como marca independiente: dominio, redes, WhatsApp, CRM y servicio al cliente propios; sin co-branding ni referencias visuales/textuales cruzadas. Fuente: Manual Interno de Marca v1.0 + instrucción explícita del usuario.

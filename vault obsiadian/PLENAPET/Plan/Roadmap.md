@@ -31,11 +31,15 @@ Objetivo: tienda funcional de punta a punta + panel de administración operable 
 
 **Storefront** (`apps/storefront`, corre en `localhost:3000`)
 - [x] Home (hero con eslogan, 4 pilares, categorías, productos destacados).
-- [x] Listado de categoría (`/productos`) con filtros: especie, etapa de vida, marca, categoría, precio máximo (vía formulario GET, sin JS necesario).
-- [x] Ficha de producto (`/productos/[slug]`) con badges de presentación/etapa/especie y advertencia de "consulta a tu veterinario" en productos de fórmula.
+- [x] Listado de categoría (`/productos`) con filtros: especie, etapa de vida, marca, categoría, precio máximo, búsqueda por nombre (vía formulario GET, sin JS necesario).
+- [x] Ficha de producto (`/productos/[slug]`) con badges de presentación/etapa/especie, advertencia de "consulta a tu veterinario" en productos de fórmula, y sección de productos relacionados de la misma categoría.
+- [x] Navegación móvil (menú hamburguesa) y buscador funcional en el Header (2026-08-17).
+- [x] Breadcrumbs y metadata SEO dinámica (`generateMetadata`) en catálogo y ficha de producto.
+- [x] Página 404 con identidad de marca (`not-found.tsx`).
 - [x] Carrito (`/carrito`, estado con Zustand + localStorage) y checkout (`/checkout`) — **UI completa, pago con Wompi todavía no conectado** (botón deshabilitado con nota explícita).
 - [ ] Cuenta de cliente: pedidos, direcciones (pendiente de Supabase Auth).
 - [ ] Páginas legales (T&C, política de datos, garantías) — contenido pendiente de la entidad legal real, ver [[Preguntas-abiertas]].
+- [ ] Fotografía real de producto (hoy placeholders de texto, ver [[Preguntas-abiertas]]).
 
 **Admin** (`apps/admin`, corre en `localhost:3001`)
 - [x] Layout con sidebar/topbar y navegación (Dashboard, Catálogo, Pedidos).
