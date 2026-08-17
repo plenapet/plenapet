@@ -58,6 +58,8 @@ Objetivo: tienda funcional de punta a punta + panel de administración operable 
 
 ## Fase 2 — Crecimiento
 
+- [ ] **Cuenta de cliente (Supabase Auth para compradores)** — se vuelve prerequisito real, no solo "nice to have", en cuanto arranque [[Vitalidad-y-Longevidad]] (Fase A de esa iniciativa necesita perfil de mascota atado a una cuenta).
+- [ ] [[Vitalidad-y-Longevidad]] — dashboard de salud/edad biológica de mascotas (investigación hecha 2026-08-17, alcance todavía sin decidir por el usuario).
 - [ ] Automatizar sincronización (pasar de adapter CSV a API o BD replica, según lo que se resuelva con VetShipping).
 - [ ] Búsqueda mejorada (full-text de Postgres o motor dedicado si el catálogo lo justifica).
 - [ ] Recompra/suscripción para consumibles (alimento, desparasitantes) — fuerte diferenciador de retención frente a Laika/Animals/Puppis.
