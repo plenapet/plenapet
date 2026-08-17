@@ -8,6 +8,7 @@ import {
 import { Badge, Container, ProductCard, formatCOP } from "@plenapet/ui";
 import { AddToCartButton } from "@/components/AddToCartButton";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { SITE_URL } from "@/lib/site-url";
 
 const LIFE_STAGE_LABEL: Record<string, string> = {
   cachorro: "Cachorro",
@@ -16,6 +17,8 @@ const LIFE_STAGE_LABEL: Record<string, string> = {
   todas: "Todas las etapas",
 };
 
+const SPECIES_LABEL: Record<string, string> = { perro: "perros", gato: "gatos" };
+
 export async function generateMetadata({
   params,
 }: {
@@ -23,11 +26,17 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const product = await getProductRepository().getBySlug(params.slug);
   if (!product) return { title: "Producto no encontrado | PlenaPet" };
+
+  const speciesText = product.species.map((s) => SPECIES_LABEL[s]).join(" y ");
+  const description =
+    product.shortDescription ||
+    `Compra ${product.name} para ${speciesText} en PlenaPet, con entrega a domicilio en Colombia.`;
+
   return {
-    title: `${product.name} | PlenaPet`,
-    description:
-      product.shortDescription ||
-      `Compra ${product.name} en PlenaPet, con entrega a domicilio.`,
+    title: `${product.name} — Comprar online con domicilio | PlenaPet`,
+    description,
+    alternates: { canonical: `/productos/${product.slug}` },
+    openGraph: { title: product.name, description, type: "website" },
   };
 }
 
@@ -53,17 +62,61 @@ export default async function ProductPage({
     .filter((p) => p.id !== product.id)
     .slice(0, 4);
 
+  const availability =
+    product.stockStatus === "out_of_stock"
+      ? "https://schema.org/OutOfStock"
+      : product.stockStatus === "low_stock"
+        ? "https://schema.org/LimitedAvailability"
+        : "https://schema.org/InStock";
+
+  const breadcrumbItems = [
+    { label: "Inicio", href: "/" },
+    ...(category
+      ? [{ label: category.name, href: `/productos?categoria=${category.slug}` }]
+      : []),
+    { label: product.name },
+  ];
+
   return (
     <Container className="py-10">
-      <Breadcrumbs
-        items={[
-          { label: "Inicio", href: "/" },
-          ...(category
-            ? [{ label: category.name, href: `/productos?categoria=${category.slug}` }]
-            : []),
-          { label: product.name },
-        ]}
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: product.name,
+            description: product.shortDescription || product.description,
+            brand: brand ? { "@type": "Brand", name: brand.name } : undefined,
+            offers: {
+              "@type": "Offer",
+              url: `${SITE_URL}/productos/${product.slug}`,
+              priceCurrency: "COP",
+              price: (product.priceCents / 100).toFixed(0),
+              availability,
+              itemCondition: "https://schema.org/NewCondition",
+            },
+          }),
+        }}
       />
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: breadcrumbItems.map((item, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              name: item.label,
+              item: item.href ? `${SITE_URL}${item.href}` : undefined,
+            })),
+          }),
+        }}
+      />
+      <Breadcrumbs items={breadcrumbItems} />
 
       <div className="mt-4 grid gap-10 lg:grid-cols-2">
         <div className="flex aspect-square items-center justify-center rounded-card border border-azul-confianza/10 bg-crema-calido">

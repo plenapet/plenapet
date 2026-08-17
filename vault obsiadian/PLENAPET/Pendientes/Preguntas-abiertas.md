@@ -18,11 +18,18 @@ Migraciones `0002_admin_users_self_read.sql` y `0003_pet_health.sql` aplicadas. 
 
 ## Siguiente paso inmediato
 
-- **Aplicar las migraciones `0004_lab_results_analyte_key.sql` y `0005_profiles_insert_policy.sql`** en el SQL Editor de Supabase — sin la 0004 no se puede calcular el estadio IRIS; sin la 0005 el respaldo defensivo de `profiles` en `/health/layout.tsx` no puede insertar (aunque el usuario de prueba actual ya quedó arreglado manualmente).
+- **Aplicar las migraciones `0004_lab_results_analyte_key.sql` y `0005_profiles_insert_policy.sql`** en el SQL Editor de Supabase — sin la 0004 no se puede calcular el estadio IRIS; sin la 0005 el respaldo defensivo de `profiles` en `/health/mascotas/layout.tsx` no puede insertar (aunque el usuario de prueba actual ya quedó arreglado manualmente).
 - **Seguir probando el flujo completo de PlenaPet Health de punta a punta**: ya se encontró y arregló un bug real (fila de `profiles` faltante); falta terminar de probar completar la encuesta, cargar resultados de laboratorio (creatinina/SDMA para ver el estadio IRIS) y publicar, y confirmar que el dashboard se ve bien.
 - **Conseguir el Anexo 1 de Banzato et al. 2019** (el listado literal de los 33 ítems — el PDF del artículo principal que ya se leyó no lo incluye) desde "Supplementary information" en la página del artículo — para replicar fielmente la encuesta en vez de los 16 ítems propios usados como primera versión. Ver [[Vitalidad-y-Longevidad]].
 - **Decidir si la encuesta de bienestar necesita revisión veterinaria** antes de mostrarse al dueño (como ya pasa con los paneles de laboratorio) — el estudio en que se basa el puntaje fue calculado por un veterinario, no autorreportado por el dueño; hoy PlenaPet lo deja como autorreporte puro.
 - **Confirmar los cortes de estadificación IRIS** (`getIrisStage()`) contra la tabla vigente en iris-kidney.com antes de usarlos con pacientes reales — idealmente con el veterinario aliado.
+
+## SEO (2026-08-17) — ver [[SEO]] para el detalle completo
+
+- **Dominio real**: sitemap.xml, robots.txt, Open Graph y canonical usan el placeholder `https://plenapet.co` (`NEXT_PUBLIC_SITE_URL`) hasta que haya un dominio confirmado — mismo pendiente que ya existía, ahora con más cosas dependiendo de él.
+- **Verificar el sitio en Google Search Console** en cuanto haya dominio — sin esto no hay forma de medir si el SEO está funcionando ni de saber qué keywords realmente traen tráfico.
+- **Decidir si se invierte en contenido/blog**: la investigación confirmó que Laika gana buena parte de su tráfico con contenido educativo (`blog.laika.com.co`). PlenaPet Health tiene un ángulo diferenciador real (prevención con datos, nadie más lo ofrece en Colombia) pero hoy solo existe la landing — no se escribieron artículos de blog todavía.
+- **Fotografía real de producto**: bloquea que el rich result de `Product` en Google se vea completo (hoy no manda `image` porque no hay fotos reales) — mismo pendiente de siempre, ahora con impacto directo en SEO también.
 - **Desplegar `apps/storefront` en Vercel** como el único proyecto — configurar `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY`.
 - El CLI de Vercel de esta máquina está en una cuenta distinta (`juankana98s-projects`) a la que tiene los proyectos de PlenaPet — la gestión de Vercel se está haciendo desde el dashboard del usuario directamente, no desde este CLI. Ver memoria `plenapet-vercel-account`.
 - Crear un proyecto/branch de **staging** separado en Supabase — hoy solo existe un proyecto y está haciendo de producción y desarrollo a la vez, lo cual es razonable por ahora pero hay que recordar separarlo antes de tener clientes reales.

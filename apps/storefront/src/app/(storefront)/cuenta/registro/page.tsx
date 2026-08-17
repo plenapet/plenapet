@@ -7,7 +7,7 @@ export default function RegistroPage({
 }: {
   searchParams: { error?: string; next?: string };
 }) {
-  const next = searchParams.next ?? "/health";
+  const next = searchParams.next ?? "/health/mascotas";
 
   return (
     <Container className="flex min-h-[70vh] items-center justify-center py-16">

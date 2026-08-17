@@ -127,7 +127,7 @@ export default async function PetDashboardPage({
     <Container className="py-10">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <Link href="/health" className="text-sm text-gris-pizarra hover:text-azul-confianza">
+          <Link href="/health/mascotas" className="text-sm text-gris-pizarra hover:text-azul-confianza">
             ← Mis mascotas
           </Link>
           <h1 className="mt-1 text-2xl font-bold text-azul-confianza">

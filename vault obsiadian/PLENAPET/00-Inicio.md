@@ -29,6 +29,7 @@ Petshop digital B2C (perros y gatos), +550 SKU entre alimentos, medicados, despa
   - [[Preguntas-abiertas]] — cosas que solo Juan Camilo puede resolver (legal, dominio, accesos) y que bloquean o condicionan el trabajo.
 - **Iniciativas** (líneas de negocio nuevas, todavía en investigación/decisión — no confundir con el roadmap de la tienda base)
   - [[Vitalidad-y-Longevidad]] — dashboard de salud/edad biológica de mascotas (biomarcadores + encuestas), inspirado en Humanolab.
+  - [[SEO]] — investigación de keywords/competencia y optimización técnica (sitemap, robots, JSON-LD, landing pública de Health).
 
 ## Estado actual (2026-08-17)
 

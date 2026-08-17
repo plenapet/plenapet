@@ -5,6 +5,7 @@ import {
   getProductRepository,
 } from "@plenapet/database";
 import { Button, Container, ProductCard, pilares } from "@plenapet/ui";
+import { SITE_URL } from "@/lib/site-url";
 
 export default async function HomePage() {
   const [products, categories, brandRepo] = await Promise.all([
@@ -17,6 +18,26 @@ export default async function HomePage() {
 
   return (
     <div>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "OnlineStore",
+            name: "PlenaPet",
+            url: SITE_URL,
+            description:
+              "Petshop digital en Colombia: alimentos, farmacia veterinaria, desparasitantes, suplementos, higiene y accesorios para perros y gatos, con entrega a domicilio.",
+            areaServed: "CO",
+            potentialAction: {
+              "@type": "SearchAction",
+              target: `${SITE_URL}/productos?q={search_term_string}`,
+              "query-input": "required name=search_term_string",
+            },
+          }),
+        }}
+      />
       <section className="bg-crema-calido">
         <Container className="grid gap-10 py-16 lg:grid-cols-2 lg:items-center lg:py-24">
           <div>

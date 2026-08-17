@@ -7,6 +7,7 @@ import {
 import { Container, ProductCard } from "@plenapet/ui";
 import { FilterSidebar } from "@/components/FilterSidebar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { SITE_URL } from "@/lib/site-url";
 
 type CatalogSearchParams = {
   q?: string;
@@ -27,18 +28,27 @@ export async function generateMetadata({
     const categoria = categories.find((c) => c.slug === searchParams.categoria);
     if (categoria) {
       return {
-        title: `${categoria.name} | PlenaPet`,
-        description: `Compra ${categoria.name.toLowerCase()} para tu perro o gato en PlenaPet, con entrega a domicilio y orientación confiable.`,
+        title: `${categoria.name} para perros y gatos — Precio y domicilio | PlenaPet`,
+        description: `Compra ${categoria.name.toLowerCase()} para tu perro o gato en PlenaPet: precios competitivos, orientación confiable y entrega a domicilio en Colombia.`,
+        // Canonical solo con la categoría — los demás filtros (especie, marca,
+        // precio) no deben generar variantes indexables aparte.
+        alternates: { canonical: `/productos?categoria=${categoria.slug}` },
       };
     }
   }
   if (searchParams.q) {
-    return { title: `Resultados para "${searchParams.q}" | PlenaPet` };
+    // Páginas de resultado de búsqueda interna: no aportan valor único al
+    // índice y pueden generar contenido delgado/duplicado.
+    return {
+      title: `Resultados para "${searchParams.q}" | PlenaPet`,
+      robots: { index: false, follow: true },
+    };
   }
   return {
-    title: "Catálogo | PlenaPet",
+    title: "Catálogo de productos veterinarios para perros y gatos | PlenaPet",
     description:
-      "Alimentos, farmacia veterinaria, desparasitantes, suplementos, higiene y accesorios para perros y gatos.",
+      "Alimentos, farmacia veterinaria, desparasitantes, vitaminas, suplementos, higiene y accesorios para perros y gatos, con entrega a domicilio en Colombia.",
+    alternates: { canonical: "/productos" },
   };
 }
 
@@ -94,14 +104,30 @@ export default async function CatalogPage({
       ? `Resultados para "${searchParams.q}"`
       : "Catálogo";
 
+  const breadcrumbItems = [
+    { label: "Inicio", href: "/" },
+    { label: titulo },
+  ];
+
   return (
     <Container className="py-10">
-      <Breadcrumbs
-        items={[
-          { label: "Inicio", href: "/" },
-          { label: titulo },
-        ]}
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: breadcrumbItems.map((item, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              name: item.label,
+              item: item.href ? `${SITE_URL}${item.href}` : undefined,
+            })),
+          }),
+        }}
       />
+      <Breadcrumbs items={breadcrumbItems} />
       <h1 className="mt-2 text-3xl font-bold text-azul-confianza">{titulo}</h1>
       <p className="mt-1 text-sm text-gris-pizarra">
         {filtered.length} producto{filtered.length !== 1 ? "s" : ""} encontrado

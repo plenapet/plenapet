@@ -9,7 +9,7 @@ export async function createPetAction(formData: FormData) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/cuenta/login?next=/health");
+  if (!user) redirect("/cuenta/login?next=/health/mascotas");
 
   const name = String(formData.get("name") ?? "").trim();
   const species = String(formData.get("species") ?? "perro");
@@ -48,7 +48,7 @@ export async function submitWellnessSurveyAction(formData: FormData) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/cuenta/login?next=/health");
+  if (!user) redirect("/cuenta/login?next=/health/mascotas");
 
   const petId = String(formData.get("petId") ?? "");
   const answers: Record<string, string> = {};

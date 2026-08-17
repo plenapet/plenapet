@@ -8,6 +8,19 @@ actualizado: 2026-08-14
 
 Formato: fecha · decisión · razón · quién la tomó. Agregar entradas nuevas al final, nunca borrar histórico (si una decisión se revierte, se agrega una entrada nueva que referencia la anterior).
 
+## 2026-08-17 — Se separa /health en landing pública + /health/mascotas (app), por SEO
+
+El usuario pidió optimizar SEO tanto del petshop como de PlenaPet Health. Investigación completa en [[SEO]]. Al auditar el sitio antes de optimizar nada, se encontró que **`/health` era técnicamente imposible de indexar**: el middleware protegía todo el namespace `/health/*`, así que cualquier visitante sin sesión (incluido Googlebot) era redirigido de inmediato a `/cuenta/login` — cero contenido que un buscador pudiera indexar, sin importar qué tan bien escrito estuviera.
+
+**Decisión**: separar el namespace.
+- `/health` — landing pública nueva, sin exigir sesión, con contenido real orientado a las keywords de prevención investigadas + `FAQPage` schema.
+- `/health/mascotas/*` — se movió ahí toda la app que sí requiere cuenta (antes vivía directo en `/health`). `middleware.ts` ahora protege `/health/mascotas/:path*` en vez de `/health/:path*`.
+- `HealthHeader` ya no asume que siempre hay un usuario logueado — muestra "Ingresar/Crear cuenta" cuando no hay sesión.
+
+Esto se hizo **antes** que cualquier otra optimización de contenido/metadata, porque ninguna otra mejora de SEO tiene sentido si la página ni siquiera es alcanzable por un crawler.
+
+**Además, técnico**: sitemap.xml y robots.txt dinámicos (`app/sitemap.ts`, `app/robots.ts`), JSON-LD (`OnlineStore`+`SearchAction` en home, `Product`+`BreadcrumbList` en catálogo/producto, `FAQPage` en la landing de Health), `metadataBase`/Open Graph/Twitter card por defecto, y `canonical` explícito para no diluir con las combinaciones de filtros del catálogo. Detalle completo en [[SEO]].
+
 ## 2026-08-17 — Primeros roles diferenciados en /admin: super_admin para lo destructivo
 
 Se cerraron los huecos de administración de PlenaPet Health que el usuario pidió completar: editar/borrar mascota, editar/borrar recomendaciones, despublicar/borrar un panel de laboratorio ya publicado, y ver el historial completo de encuestas de bienestar (con cada pregunta y la respuesta elegida, agrupado por sistema).
