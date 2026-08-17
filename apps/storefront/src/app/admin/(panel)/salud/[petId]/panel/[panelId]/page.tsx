@@ -1,21 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { HEALTH_SYSTEMS, getServiceSupabaseClient } from "@plenapet/database";
+import { getIrisStage, getServiceSupabaseClient, healthSystemLabel } from "@plenapet/database";
 import { Badge } from "@plenapet/ui";
 import { Topbar } from "@/components/admin/Topbar";
-import {
-  addLabResultAction,
-  deleteLabResultAction,
-  publishLabPanelAction,
-} from "@/lib/actions/admin-health";
-
-const EXAM_TYPES = [
-  "hemograma",
-  "quimica_sanguinea",
-  "uroanalisis",
-  "coprologico",
-  "otro",
-];
+import { AddLabResultForm } from "@/components/admin/AddLabResultForm";
+import { deleteLabResultAction, publishLabPanelAction } from "@/lib/actions/admin-health";
 
 export default async function PanelPage({
   params,
@@ -25,7 +14,7 @@ export default async function PanelPage({
   const supabase = getServiceSupabaseClient();
 
   const [{ data: pet }, { data: panel }, { data: results }] = await Promise.all([
-    supabase.from("pets").select("id, name").eq("id", params.petId).maybeSingle(),
+    supabase.from("pets").select("id, name, species").eq("id", params.petId).maybeSingle(),
     supabase.from("lab_panels").select("*").eq("id", params.panelId).maybeSingle(),
     supabase
       .from("lab_results")
@@ -35,6 +24,14 @@ export default async function PanelPage({
   ]);
 
   if (!pet || !panel) notFound();
+
+  const creatinina = results?.find((r) => r.analyte_key === "creatinina")?.value ?? null;
+  const sdma = results?.find((r) => r.analyte_key === "sdma")?.value ?? null;
+  const iris = getIrisStage({
+    species: pet.species,
+    creatinineMgDl: creatinina,
+    sdmaUgDl: sdma,
+  });
 
   return (
     <div>
@@ -47,7 +44,7 @@ export default async function PanelPage({
           ← {pet.name}
         </Link>
 
-        <div className="flex items-center justify-between rounded-card border border-azul-confianza/10 bg-white p-5 shadow-card">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-card border border-azul-confianza/10 bg-white p-5 shadow-card">
           <div>
             <p className="font-semibold text-azul-confianza">
               {panel.lab_name || "Laboratorio"} — {panel.sample_taken_at ?? "sin fecha"}
@@ -55,6 +52,14 @@ export default async function PanelPage({
             <Badge tone={panel.status === "published" ? "aqua" : "neutral"}>
               {panel.status === "published" ? "Publicado" : "Borrador"}
             </Badge>
+            {iris && (
+              <p className="mt-2 text-sm font-semibold text-azul-confianza">
+                🩺 {iris.label}{" "}
+                <span className="font-normal text-gris-pizarra">
+                  (estadificación IRIS, basada en {iris.basedOn})
+                </span>
+              </p>
+            )}
           </div>
           {panel.status === "draft" && (
             <form action={publishLabPanelAction}>
@@ -97,7 +102,9 @@ export default async function PanelPage({
                       ? `${r.reference_min} – ${r.reference_max}`
                       : "—"}
                   </td>
-                  <td className="px-4 py-2 text-gris-pizarra">{r.organ_system}</td>
+                  <td className="px-4 py-2 text-gris-pizarra">
+                    {healthSystemLabel(r.organ_system)}
+                  </td>
                   <td className="px-4 py-2 text-right">
                     {panel.status === "draft" && (
                       <form action={deleteLabResultAction}>
@@ -127,81 +134,7 @@ export default async function PanelPage({
         </div>
 
         {panel.status === "draft" && (
-          <form
-            action={addLabResultAction}
-            className="grid gap-3 rounded-card border border-dashed border-azul-confianza/25 bg-white p-5 sm:grid-cols-3"
-          >
-            <input type="hidden" name="petId" value={pet.id} />
-            <input type="hidden" name="labPanelId" value={panel.id} />
-
-            <select
-              name="examType"
-              required
-              className="rounded-lg border border-azul-confianza/15 px-3 py-2 text-sm"
-            >
-              {EXAM_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-            <input
-              name="analyteName"
-              placeholder="Analito (ej. Hemoglobina)"
-              required
-              className="rounded-lg border border-azul-confianza/15 px-3 py-2 text-sm"
-            />
-            <select
-              name="organSystem"
-              required
-              className="rounded-lg border border-azul-confianza/15 px-3 py-2 text-sm"
-            >
-              {HEALTH_SYSTEMS.map((s) => (
-                <option key={s.key} value={s.key}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-
-            <input
-              name="value"
-              type="number"
-              step="any"
-              placeholder="Valor numérico"
-              className="rounded-lg border border-azul-confianza/15 px-3 py-2 text-sm"
-            />
-            <input
-              name="unit"
-              placeholder="Unidad (g/dL, mg/dL...)"
-              className="rounded-lg border border-azul-confianza/15 px-3 py-2 text-sm"
-            />
-            <input
-              name="valueText"
-              placeholder="O valor no numérico (ej. 'presente')"
-              className="rounded-lg border border-azul-confianza/15 px-3 py-2 text-sm"
-            />
-
-            <input
-              name="referenceMin"
-              type="number"
-              step="any"
-              placeholder="Rango ref. mínimo"
-              className="rounded-lg border border-azul-confianza/15 px-3 py-2 text-sm"
-            />
-            <input
-              name="referenceMax"
-              type="number"
-              step="any"
-              placeholder="Rango ref. máximo"
-              className="rounded-lg border border-azul-confianza/15 px-3 py-2 text-sm"
-            />
-            <button
-              type="submit"
-              className="rounded-full bg-azul-confianza px-4 py-2 text-sm font-semibold text-white"
-            >
-              Agregar analito
-            </button>
-          </form>
+          <AddLabResultForm petId={pet.id} labPanelId={panel.id} species={pet.species} />
         )}
       </div>
     </div>

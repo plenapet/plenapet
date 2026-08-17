@@ -32,6 +32,7 @@ export async function addLabResultAction(formData: FormData) {
   const supabase = getServiceSupabaseClient();
   const { error } = await supabase.from("lab_results").insert({
     lab_panel_id: labPanelId,
+    analyte_key: String(formData.get("analyteKey") ?? "").trim() || null,
     exam_type: String(formData.get("examType") ?? "").trim(),
     analyte_name: String(formData.get("analyteName") ?? "").trim(),
     value: formData.get("value") ? Number(formData.get("value")) : null,

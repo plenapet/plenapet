@@ -5,6 +5,7 @@ import {
   HEALTH_SYSTEMS,
   aggregateSystemScores,
   estimateBiologicalAge,
+  getIrisStage,
   healthSystemLabel,
   mergeSystemScores,
   scoreLabResult,
@@ -91,6 +92,14 @@ export default async function PetDashboardPage({
         : { system: r.organ_system as HealthSystemKey, score };
     })
     .filter((e): e is { system: HealthSystemKey; score: number } => e !== null);
+
+  const creatinina = allLabResults.find((r) => r.analyte_key === "creatinina")?.value ?? null;
+  const sdma = allLabResults.find((r) => r.analyte_key === "sdma")?.value ?? null;
+  const iris = getIrisStage({
+    species: pet.species,
+    creatinineMgDl: creatinina,
+    sdmaUgDl: sdma,
+  });
 
   const labSystemScores = aggregateSystemScores(labScoreEntries);
   const surveyDomainScores = (lastSurvey?.domain_scores ?? {}) as Partial<
@@ -213,6 +222,14 @@ export default async function PetDashboardPage({
                     {score}
                     <span className="text-sm text-gris-pizarra">/100</span>
                   </p>
+                  {system.key === "renal" && iris && (
+                    <p className="mt-2 text-xs font-semibold text-azul-confianza">
+                      🩺 {iris.label}
+                      <span className="block font-normal text-gris-pizarra">
+                        Estadificación IRIS — estándar clínico veterinario mundial.
+                      </span>
+                    </p>
+                  )}
                 </div>
               );
             })}

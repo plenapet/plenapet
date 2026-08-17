@@ -1,7 +1,7 @@
 ---
 tipo: iniciativa
 proyecto: PlenaPet
-estado: investigación inicial — sin decisión de alcance todavía
+estado: v1 construida (encuesta + laboratorio manual + dashboard), pendiente probar end-to-end
 actualizado: 2026-08-17
 ---
 
@@ -65,3 +65,22 @@ Esto es una extensión de [[Modelo-de-datos]], no un rediseño — se integra co
 - Si se arranca por Fase A (encuesta) antes de negociar cualquier cosa con laboratorios, que es la recomendación de este documento.
 
 Ver [[Registro-de-decisiones]] para cuando el usuario resuelva estos puntos — se debe registrar ahí, no solo aquí.
+
+## Qué se construyó (2026-08-17) — ver [[Registro-de-decisiones]] para el detalle técnico
+
+Se saltó directo a Fase A + B combinadas (el usuario ya tenía laboratorio aliado resuelto): cuenta de cliente, perfil de mascota, encuesta de bienestar, carga manual de resultados de laboratorio desde `/admin/salud`, dashboard consolidado con puntaje por sistema y edad biológica estimada. Módulo separado en UX como **PlenaPet Health** (`/health`), mismo dominio y cuenta que el petshop.
+
+## Investigación adicional — cómo acercarse a "clínicamente validado" (2026-08-17)
+
+El usuario preguntó explícitamente cómo vincular el algoritmo clínicamente validado (el de Purina/GeroScience) en vez de usar solo una heurística propia. Conclusión de la investigación: **el algoritmo específico de Purina no es replicable ni licenciable** (es investigación con datos propietarios, no se publican los pesos/coeficientes del modelo completo) — pero **sí hay piezas reales, publicadas y gratuitas que se pueden adoptar directamente**, y todas funcionan con los exámenes que sí se pueden hacer en Colombia (hemograma, química sanguínea, orina, coprológico — el usuario confirmó que metilación de ADN no es viable acá, lo cual descarta los relojes epigenéticos sin que eso sea una pérdida real, porque no eran el camino comercial de todas formas):
+
+- **Canine Frailty Index** (Banzato et al. 2019, *Scientific Reports*, revisado por pares, validado contra mortalidad real) — 33 ítems clínicos sumados y divididos entre el total, exactamente el mismo principio de "acumulación de déficits" que ya usa la encuesta de PlenaPet. **Pendiente**: conseguir el paper completo (Anexo 1) para replicar fielmente los 33 ítems exactos en vez de los 16 propios que se usaron como primera versión — no se pudo extraer el listado completo por las herramientas de investigación disponibles en esta sesión. ([PubMed](https://pubmed.ncbi.nlm.nih.gov/31727920/))
+- **IRIS Staging** (International Renal Interest Society) para enfermedad renal crónica — el estándar clínico que usa cualquier veterinario en el mundo, gratuito, basado en creatinina y/o SDMA (ambos ya están en el catálogo de química sanguínea). **Ya implementado** (`getIrisStage` en `packages/database/src/health-scoring.ts`), con los cortes de las guías IRIS más citadas — deben confirmarse contra la tabla vigente en [iris-kidney.com](https://www.iris-kidney.com/iris-staging-system) antes de usarse con pacientes reales. ([IDEXX](https://www.idexx.com/en/veterinary/reference-laboratories/sdma/sdma-iris/), [IRIS Kidney](https://www.iris-kidney.com/iris-staging-system))
+- Hay más investigación reciente que confirma que el camino de "hemograma + química" es donde está la ciencia activa: un estudio de 2026 en *GeroScience* entrenó un modelo de edad con 3+ millones de valores de laboratorio de ~145.000 labradores (XGBoost) — tampoco es un modelo que se pueda "instalar", pero refuerza que el enfoque de PlenaPet (hemograma + química como base) es el correcto.
+
+**Decisión de cómo presentarlo**: en vez de un solo número "mágico" fingiendo validación total, PlenaPet debe ser honesto pieza por pieza — citar el Canine Frailty Index para la encuesta, IRIS para renal (ambos reales y verificables), y dejar claro que la "edad biológica" consolidada es la síntesis propia de PlenaPet de esas piezas. Es más creíble que inventar una validación que no existe, y es coherente con la regla de marca de nunca prometer resultados clínicos.
+
+**Caminos de mediano/largo plazo (no implementados, quedan para cuando haya tracción)**:
+- Escribir a los autores del estudio de Purina/GeroScience para explorar colaboración académica (bajo costo, sin garantía de respuesta).
+- Alianza con una universidad veterinaria colombiana para co-validar el modelo propio con datos reales.
+- La única forma de tener un algoritmo *verdaderamente* validado por PlenaPet es replicar lo que hicieron Purina (12 años, 829 perros) y el Dog Aging Project: acumular datos propios de las mismas mascotas a lo largo del tiempo y correlacionarlos con desenlaces reales. No hay atajo — es función de tiempo y volumen de datos, no de ingeniería. Cada encuesta y panel cargado hoy es, sin saberlo, el primer dato de esa futura cohorte propia.

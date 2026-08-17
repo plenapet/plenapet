@@ -1,12 +1,25 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getServiceSupabaseClient } from "@plenapet/database";
+import {
+  ANALYTE_CATALOG,
+  EXAM_TYPE_LABEL,
+  getReferenceRange,
+  getServiceSupabaseClient,
+  type ExamType,
+} from "@plenapet/database";
 import { Badge } from "@plenapet/ui";
 import { Topbar } from "@/components/admin/Topbar";
 import {
   addHealthRecommendationAction,
   createLabPanelAction,
 } from "@/lib/actions/admin-health";
+
+const EXAM_TYPES: ExamType[] = [
+  "hemograma",
+  "quimica_sanguinea",
+  "uroanalisis",
+  "coprologico",
+];
 
 export default async function SaludMascotaPage({
   params,
@@ -56,6 +69,38 @@ export default async function SaludMascotaPage({
             {(pet as any).profiles?.full_name ?? "—"}
           </p>
         </div>
+
+        <details className="rounded-card border border-aqua-bienestar/40 bg-aqua-bienestar/10 p-5">
+          <summary className="cursor-pointer text-sm font-bold text-azul-confianza">
+            Exámenes recomendados para un chequeo completo de {pet.name}
+          </summary>
+          <p className="mt-2 text-xs text-azul-confianza/80">
+            Pídele esto al laboratorio antes de crear el panel. Rangos de
+            referencia sugeridos para {pet.species === "gato" ? "gatos" : "perros"}
+            {" "}— confírmalos siempre contra lo que reporte el laboratorio.
+          </p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            {EXAM_TYPES.map((type) => (
+              <div key={type}>
+                <h4 className="text-xs font-bold uppercase tracking-wide text-azul-confianza">
+                  {EXAM_TYPE_LABEL[type]}
+                </h4>
+                <ul className="mt-1 space-y-0.5 text-xs text-azul-confianza/80">
+                  {ANALYTE_CATALOG.filter((a) => a.examType === type).map((a) => {
+                    const range = getReferenceRange(a.key, pet.species);
+                    return (
+                      <li key={a.key}>
+                        {a.name}
+                        {range && ` (${range.min}–${range.max} ${a.unit})`}
+                        {a.qualitative && " (cualitativo)"}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </details>
 
         {searchParams.error && (
           <p className="rounded-lg bg-[#FFF1E0] px-3 py-2 text-sm text-[#8A4B00]">

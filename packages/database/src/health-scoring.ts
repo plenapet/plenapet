@@ -1,4 +1,4 @@
-import type { HealthSystemKey } from "./health-types";
+import type { HealthSystemKey, PetSpecies } from "./health-types";
 
 /**
  * Puntaje de un resultado de laboratorio individual: 100 si está dentro del
@@ -83,4 +83,73 @@ export function scoreToStatus(
   if (score >= 60) return "bien";
   if (score >= 40) return "atencion";
   return "prioritario";
+}
+
+export interface IrisStageResult {
+  stage: 1 | 2 | 3 | 4;
+  label: string;
+  basedOn: "creatinina" | "sdma" | "creatinina+sdma";
+}
+
+/**
+ * Estadificación IRIS (International Renal Interest Society) de enfermedad
+ * renal crónica en perros y gatos — a diferencia de `estimateBiologicalAge`,
+ * **esta sí es una escala clínica publicada y usada mundialmente por
+ * veterinarios** (no un invento de PlenaPet), basada en creatinina y/o SDMA.
+ *
+ * Los puntos de corte usados acá son los valores de referencia comúnmente
+ * publicados de la guía IRIS — deben confirmarse contra la tabla vigente en
+ * iris-kidney.com/iris-guidelines-1 antes de usarse para decisiones clínicas
+ * reales; esto no reemplaza el criterio de un veterinario.
+ */
+export function getIrisStage(input: {
+  species: PetSpecies;
+  creatinineMgDl?: number | null;
+  sdmaUgDl?: number | null;
+}): IrisStageResult | null {
+  const { species, creatinineMgDl, sdmaUgDl } = input;
+
+  const stageFromCreatinine = (): 1 | 2 | 3 | 4 | null => {
+    if (creatinineMgDl == null) return null;
+    const cutoffs =
+      species === "gato"
+        ? { s1: 1.6, s2: 2.8, s3: 5.0 }
+        : { s1: 1.4, s2: 2.8, s3: 5.0 };
+    if (creatinineMgDl < cutoffs.s1) return 1;
+    if (creatinineMgDl <= cutoffs.s2) return 2;
+    if (creatinineMgDl <= cutoffs.s3) return 3;
+    return 4;
+  };
+
+  const stageFromSdma = (): 1 | 2 | 3 | 4 | null => {
+    if (sdmaUgDl == null) return null;
+    if (sdmaUgDl < 18) return 1;
+    if (sdmaUgDl <= 25) return 2;
+    if (sdmaUgDl <= 38) return 3;
+    return 4;
+  };
+
+  const creatinineStage = stageFromCreatinine();
+  const sdmaStage = stageFromSdma();
+
+  if (creatinineStage == null && sdmaStage == null) return null;
+
+  // IRIS recomienda usar ambos marcadores juntos cuando están disponibles y
+  // tomar el estadio más avanzado (más severo) que sugiera cualquiera de los dos.
+  const stage = Math.max(creatinineStage ?? 0, sdmaStage ?? 0) as 1 | 2 | 3 | 4;
+  const basedOn =
+    creatinineStage != null && sdmaStage != null
+      ? "creatinina+sdma"
+      : creatinineStage != null
+        ? "creatinina"
+        : "sdma";
+
+  const labels: Record<1 | 2 | 3 | 4, string> = {
+    1: "IRIS Estadio 1 — función renal normal o daño subclínico",
+    2: "IRIS Estadio 2 — enfermedad renal leve",
+    3: "IRIS Estadio 3 — enfermedad renal moderada",
+    4: "IRIS Estadio 4 — enfermedad renal severa",
+  };
+
+  return { stage, label: labels[stage], basedOn };
 }

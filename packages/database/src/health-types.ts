@@ -53,6 +53,7 @@ export type LabPanelStatus = "draft" | "published";
 export interface LabResult {
   id: string;
   labPanelId: string;
+  analyteKey?: string | null;
   examType: string;
   analyteName: string;
   value?: number | null;

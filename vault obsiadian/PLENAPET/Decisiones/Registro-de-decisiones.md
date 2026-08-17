@@ -82,6 +82,22 @@ El usuario pidió explícitamente que esto se viera como **"PlenaPet Health"**, 
 
 **Pendiente bloqueante**: la migración `supabase/migrations/0003_pet_health.sql` fue escrita pero el usuario todavía no la ha aplicado en el SQL Editor — sin eso, `/health` y `/admin/salud` no funcionan (fallarán al consultar tablas que no existen). Ver [[Preguntas-abiertas]].
 
+## 2026-08-17 — Catálogo clínico de exámenes + estadificación IRIS real
+
+El usuario pidió específicamente que el sistema le diga qué exámenes pedir al laboratorio (no texto libre), confirmando que en Colombia se pueden hacer hemograma, química sanguínea, uroanálisis y coprológico, pero no metilación de ADN.
+
+**Construido**:
+- `packages/database/src/exam-catalog.ts` — catálogo estándar de analitos por tipo de examen (hemograma, química, uroanálisis, coprológico), cada uno con sistema/órgano y rango de referencia por especie (perro/gato), basado en literatura de patología clínica veterinaria de uso común. Son valores de partida para agilizar la carga, no la verdad absoluta — el admin puede ajustarlos, y el rango que reporta el laboratorio real sigue siendo el autoritativo por panel.
+- `getIrisStage()` en `health-scoring.ts` — **estadificación IRIS real** (estándar clínico veterinario mundial para enfermedad renal crónica, no un invento de PlenaPet), a partir de creatinina y/o SDMA. Cortes tomados de las guías IRIS más citadas — pendiente confirmar contra la tabla vigente en iris-kidney.com antes de uso clínico real.
+- Migración `0004_lab_results_analyte_key.sql`: agrega `analyte_key` a `lab_results` para poder identificar analitos estándar (ej. creatinina, SDMA) de forma confiable en vez de comparar texto libre.
+- Admin (`AddLabResultForm`): ahora selecciona del catálogo (autocompleta sistema/rango/unidad) en vez de texto libre en todos los campos; sigue existiendo "otro analito" para lo que no está en el catálogo.
+- `/admin/salud/[petId]`: bloque colapsable "Exámenes recomendados" — lista completa del catálogo por tipo de examen con rangos para la especie de esa mascota, para que el admin sepa qué pedir al laboratorio antes de crear el panel.
+- Dashboard del propietario y panel del admin muestran el estadio IRIS junto al puntaje del sistema renal cuando hay creatinina/SDMA cargados.
+
+Ver investigación completa (fuentes, qué SÍ es adoptable de la ciencia publicada y qué no) en [[Vitalidad-y-Longevidad]].
+
+**Pendiente**: aplicar `0004_lab_results_analyte_key.sql` en Supabase (mismo flujo SQL Editor de siempre) — sin eso, el estadio IRIS no puede calcularse porque no hay forma de identificar cuál resultado es la creatinina.
+
 ## 2026-08-14 — Separación de datos con VetShipping
 
 - Decisión: el proyecto de Supabase de PlenaPet debe ser **independiente** del que use VetShipping (si aplica), no una instancia compartida. Razón: independencia de marca ante el consumidor + aislamiento de seguridad entre un negocio B2B y uno B2C con datos de pago de consumidores finales.
