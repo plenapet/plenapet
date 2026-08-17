@@ -67,19 +67,7 @@ export function Header() {
           <Logo />
         </Link>
 
-        <nav className="hidden flex-1 items-center gap-5 overflow-x-auto text-sm font-medium text-gris-pizarra lg:flex">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="whitespace-nowrap transition-colors hover:text-azul-confianza"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
-        <SearchForm className="hidden w-64 shrink-0 lg:block" />
+        <SearchForm className="hidden max-w-md flex-1 lg:block" />
 
         <div className="flex items-center gap-3">
           <Link
@@ -118,6 +106,22 @@ export function Header() {
           </button>
         </div>
       </Container>
+
+      <div className="hidden border-t border-azul-confianza/10 lg:block">
+        <Container>
+          <nav className="flex h-11 items-center justify-center gap-7 text-sm font-medium text-gris-pizarra">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="whitespace-nowrap transition-colors hover:text-azul-confianza"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        </Container>
+      </div>
 
       {menuOpen && (
         <div className="border-t border-azul-confianza/10 bg-white lg:hidden">
