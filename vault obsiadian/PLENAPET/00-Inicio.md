@@ -32,7 +32,7 @@ Petshop digital B2C (perros y gatos), +550 SKU entre alimentos, medicados, despa
 
 ## Estado actual (2026-08-17)
 
-Fase: **Fase 1 — Supabase real conectado**, una sola app Next.js (`apps/storefront`, tienda pública + `/admin` protegido por login real). Ver [[Roadmap]] para el detalle de fases y [[Registro-de-decisiones]] para las decisiones ya cerradas. Hay una iniciativa nueva en investigación ([[Vitalidad-y-Longevidad]]) que todavía no tiene alcance decidido ni código.
+Una sola app Next.js (`apps/storefront`): tienda pública, `/admin` (equipo interno, login real) y `/health` (**PlenaPet Health**, módulo nuevo de bienestar/edad biológica de mascotas — cuenta de cliente + encuesta + resultados de laboratorio cargados por el admin + dashboard). Supabase real conectado, migraciones `0001`–`0003` aplicadas. Ver [[Roadmap]] para el detalle de fases y [[Registro-de-decisiones]] para las decisiones ya cerradas. **Falta probar PlenaPet Health de punta a punta en el navegador** — ver [[Preguntas-abiertas]].
 
 ## Regla de oro para cualquier sesión futura
 

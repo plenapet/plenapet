@@ -83,6 +83,12 @@ export function Header() {
 
         <div className="flex items-center gap-3">
           <Link
+            href="/health"
+            className="hidden items-center gap-1.5 rounded-full border border-aqua-bienestar/50 bg-aqua-bienestar/15 px-3 py-1.5 text-sm font-semibold text-azul-confianza sm:inline-flex"
+          >
+            🩺 PlenaPet Health
+          </Link>
+          <Link
             href="/carrito"
             className="relative inline-flex items-center rounded-full bg-azul-confianza px-4 py-2 text-sm font-semibold text-white"
           >
@@ -117,6 +123,13 @@ export function Header() {
         <div className="border-t border-azul-confianza/10 bg-white lg:hidden">
           <Container className="space-y-4 py-4">
             <SearchForm onSubmit={() => setMenuOpen(false)} />
+            <Link
+              href="/health"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-1.5 rounded-full border border-aqua-bienestar/50 bg-aqua-bienestar/15 px-3 py-2 text-sm font-semibold text-azul-confianza"
+            >
+              🩺 PlenaPet Health
+            </Link>
             <nav className="flex flex-col divide-y divide-azul-confianza/5 text-sm font-medium text-gris-pizarra">
               {NAV_LINKS.map((link) => (
                 <Link

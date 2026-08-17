@@ -12,15 +12,14 @@ Cosas que bloquean o condicionan el trabajo y que solo Juan Camilo (o su equipo 
 
 La migración y el seed se aplicaron en el proyecto real (`rgpowmszbotcwrubguek`) y ambas apps ya corren contra Supabase de verdad, no mock. Ver [[Registro-de-decisiones]].
 
+## Resuelto — admin real y PlenaPet Health desplegados en código (2026-08-17)
+
+Migraciones `0002_admin_users_self_read.sql` y `0003_pet_health.sql` aplicadas. Primer usuario admin creado (`juancamilo965@gmail.com`, `super_admin`). Proyecto `plenapet-admin` de Vercel borrado por el usuario (quedó obsoleto tras fusionar todo en `apps/storefront`).
+
 ## Siguiente paso inmediato
 
-- **Aplicar la migración `supabase/migrations/0002_admin_users_self_read.sql`** en el SQL Editor de Supabase (mismo flujo que la 0001) — sin esto, el chequeo de "¿este usuario es admin activo?" en `/admin/(panel)/layout.tsx` no puede leer `admin_users` y nadie va a poder pasar del login.
-- **Crear el primer usuario admin**: en el dashboard de Supabase → Authentication → Users → Add User (email + password). Copiar el UUID del usuario creado y correr en el SQL Editor:
-  ```sql
-  insert into admin_users (id, role, active) values ('<uuid-del-usuario>', 'super_admin', true);
-  ```
-- **Qué hacer con el proyecto `plenapet-admin` de Vercel**: quedó obsoleto tras fusionar admin dentro de `apps/storefront` (2026-08-17). Opciones: borrarlo, o dejarlo apagado. Falta que Juan Camilo decida.
-- **Desplegar `apps/storefront` (ya con `/admin` incluido) en Vercel** como el único proyecto — configurar `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY` (las tres, ahora todas las necesita esta única app).
+- **Probar el flujo completo de PlenaPet Health de punta a punta** (nadie lo ha probado en el navegador todavía): registrar una cuenta de cliente en `/cuenta/registro` → agregar una mascota en `/health/mascotas/nueva` → completar la encuesta de bienestar → como admin, ir a `/admin/salud`, buscar esa mascota, crear un panel de laboratorio, agregar unos analitos y publicarlo → volver a `/health/mascotas/[id]` como cliente y confirmar que el dashboard muestra el puntaje por sistema y la edad biológica estimada correctamente.
+- **Desplegar `apps/storefront` en Vercel** como el único proyecto — configurar `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY`.
 - El CLI de Vercel de esta máquina está en una cuenta distinta (`juankana98s-projects`) a la que tiene los proyectos de PlenaPet — la gestión de Vercel se está haciendo desde el dashboard del usuario directamente, no desde este CLI. Ver memoria `plenapet-vercel-account`.
 - Crear un proyecto/branch de **staging** separado en Supabase — hoy solo existe un proyecto y está haciendo de producción y desarrollo a la vez, lo cual es razonable por ahora pero hay que recordar separarlo antes de tener clientes reales.
 - Para futuros push a GitHub desde esta u otra máquina: no hay credenciales guardadas (a propósito), hace falta un token/`gh auth login`/SSH configurado por quien vaya a pushear.

@@ -39,6 +39,19 @@ El storefront **nunca lee directamente** datos crudos de VetShipping. Todo lo p�
 - **admin_users**: `auth_user_id, role (super_admin|catalog_manager|order_manager|support), active`.
 - **audit_log**: `actor_id, action, entity, entity_id, diff jsonb, created_at` — trazabilidad de cambios hechos desde el admin (quién cambió qué precio, quién ocultó qué producto, etc.).
 
+## Tablas de PlenaPet Health (implementadas en `supabase/migrations/0003_pet_health.sql`)
+
+Módulo aparte del petshop (mismo dominio, misma cuenta de cliente, secciones distintas — ver [[Vitalidad-y-Longevidad]] y [[Registro-de-decisiones]] 2026-08-17). Dueño de la fila = `pets.customer_id = auth.uid()` vía `profiles`.
+
+- **pets**: `id, customer_id, name, species (perro|gato), breed, sex, sterilized, birth_date, estimated_age_years, weight_kg, photo_url, created_at`.
+- **wellness_surveys**: `id, pet_id, submitted_at, answers jsonb, domain_scores jsonb, overall_score numeric` — resultado de la encuesta de bienestar (`packages/database/src/wellness-survey.ts`), calculado por deficit-accumulation (mismo enfoque que el "índice de fragilidad" del Dog Aging Project).
+- **lab_panels**: `id, pet_id, lab_name, sample_taken_at, status (draft|published), notes, created_by (admin_users), published_at, created_at` — una orden/evento de laboratorio (hemograma + química + orina + coprológico del mismo día, por ejemplo). El dueño solo ve paneles `published`.
+- **lab_results**: `id, lab_panel_id, exam_type, analyte_name, value, value_text, unit, reference_min, reference_max, organ_system, created_at` — un analito individual, cargado manualmente por el equipo interno desde `/admin/salud`. `reference_min/max` los define el laboratorio aliado en su reporte, PlenaPet no inventa rangos clínicos.
+- **health_recommendations**: `id, pet_id, source (survey|lab|manual), title, description, severity (info|atencion|urgente), related_product_id, created_at` — enlazable a un producto del catálogo para cross-sell.
+- **profiles** ahora se llena automáticamente vía un trigger (`handle_new_user`) al registrarse un cliente nuevo — antes existía en el esquema pero nada lo alimentaba, porque no había signup de cliente.
+
+`organ_system`/`domain` usan el mismo vocabulario compartido (`HEALTH_SYSTEMS` en `packages/database/src/health-types.ts`) para poder consolidar encuesta + laboratorio en un solo dashboard "por sistema".
+
 ## RLS — reglas generales
 
 - `anon` / `authenticated` (clientes): `SELECT` solo sobre `products`, `product_variants`, `categories`, `brands`, `promotions` donde `active = true`; sobre sus propios `orders`, `order_items`, `addresses`, `profiles`, `cart_items` (filtrado por `auth.uid()`).

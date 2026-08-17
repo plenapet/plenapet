@@ -18,7 +18,10 @@ import {
 
 export * from "./types";
 export * from "./repositories";
-export { isSupabaseConfigured } from "./supabase/client";
+export * from "./health-types";
+export * from "./wellness-survey";
+export * from "./health-scoring";
+export { isSupabaseConfigured, getServiceSupabaseClient } from "./supabase/client";
 
 /**
  * Punto único de acceso a los repositorios.

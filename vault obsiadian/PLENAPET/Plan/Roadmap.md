@@ -6,7 +6,7 @@ actualizado: 2026-08-14
 
 # Roadmap y fases
 
-Estado global: **Fase 1 en curso — construcción local con datos mock**, sin Supabase todavía (a propósito, ver [[Registro-de-decisiones]]).
+Estado global: **Fase 1 (tienda) casi cerrada + Fase 2 arrancó en paralelo con PlenaPet Health**, ambas sobre Supabase real. Ver [[Registro-de-decisiones]] para el detalle de cada corte.
 
 ## Fase 0 — Fundaciones (setup)
 
@@ -58,8 +58,10 @@ Objetivo: tienda funcional de punta a punta + panel de administración operable 
 
 ## Fase 2 — Crecimiento
 
-- [ ] **Cuenta de cliente (Supabase Auth para compradores)** — se vuelve prerequisito real, no solo "nice to have", en cuanto arranque [[Vitalidad-y-Longevidad]] (Fase A de esa iniciativa necesita perfil de mascota atado a una cuenta).
-- [ ] [[Vitalidad-y-Longevidad]] — dashboard de salud/edad biológica de mascotas (investigación hecha 2026-08-17, alcance todavía sin decidir por el usuario).
+- [x] **Cuenta de cliente (Supabase Auth)** — `/cuenta/login`, `/cuenta/registro`, trigger `handle_new_user` que crea `profiles` automáticamente. Construido 2026-08-17 como prerequisito de PlenaPet Health.
+- [x] **PlenaPet Health v1** — ver [[Vitalidad-y-Longevidad]] y [[Registro-de-decisiones]] (2026-08-17). Construido: registro de mascota, encuesta de bienestar con puntaje por dominio, carga de resultados de laboratorio desde `/admin/salud` (borrador → publicar), dashboard del propietario con estado por sistema y edad biológica estimada (heurística propia, no clínicamente validada — ver disclaimer en la UI). Migración `0003_pet_health.sql` aplicada en Supabase (2026-08-17). **Pendiente**: probar el flujo completo de punta a punta (ver [[Preguntas-abiertas]]).
+  - [ ] Fast-follow conocido: carga de resultados de laboratorio es una fila a la vez en el admin — si resulta muy lento con paneles de 20+ analitos, considerar carga masiva (pegar CSV/texto).
+  - [ ] Fast-follow: vender el examen como producto del catálogo (checkout) en vez de asumir que la muestra ya se coordinó por fuera.
 - [ ] Automatizar sincronización (pasar de adapter CSV a API o BD replica, según lo que se resuelva con VetShipping).
 - [ ] Búsqueda mejorada (full-text de Postgres o motor dedicado si el catálogo lo justifica).
 - [ ] Recompra/suscripción para consumibles (alimento, desparasitantes) — fuerte diferenciador de retención frente a Laika/Animals/Puppis.

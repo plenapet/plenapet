@@ -6,6 +6,7 @@ const LINKS = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/catalogo", label: "Catálogo" },
   { href: "/admin/pedidos", label: "Pedidos" },
+  { href: "/admin/salud", label: "PlenaPet Health" },
 ];
 
 export function Sidebar({ email }: { email: string }) {

@@ -18,6 +18,7 @@ Este proyecto usa un **vault de Obsidian como memoria permanente entre sesiones*
 - `Plan/Roadmap.md` — fases de trabajo y checklist de entregables, con estado actual.
 - `Decisiones/Registro-de-decisiones.md` — ADR log: qué se decidió, cuándo y por qué. **Revisar antes de proponer algo que suene a decisión estructural nueva** — si ya está decidido, no se re-discute sin una razón nueva explícita del usuario.
 - `Pendientes/Preguntas-abiertas.md` — cosas que solo el usuario puede resolver (entidad legal, dominio, cuenta Wompi, assets de marca reales, mecanismo real de integración con VetShipping).
+- `Iniciativas/Vitalidad-y-Longevidad.md` — investigación y diseño de PlenaPet Health (dashboard de salud/edad biológica de mascotas).
 
 **Regla de trabajo**: cualquier decisión estructural nueva (stack, modelo de datos, alcance, marca) o avance de fase se registra en el vault (no solo queda en el chat). El vault es la fuente de verdad de largo plazo; este `CLAUDE.md` es un resumen de arranque rápido.
 
@@ -31,9 +32,11 @@ Este proyecto usa un **vault de Obsidian como memoria permanente entre sesiones*
 
 ## Estado actual
 
-**Fase 1 en curso.** Repo en `github.com/plenapet/plenapet` (push hecho a `main`) y **Supabase real conectado y verificado** (`rgpowmszbotcwrubguek`): esquema + RLS aplicados, seed cargado. `packages/database` ya no usa el mock por defecto — el fallback a mock solo entra si se corre sin `.env.local` configurado.
+Repo en `github.com/plenapet/plenapet` y **Supabase real conectado y verificado** (`rgpowmszbotcwrubguek`), migraciones `0001`–`0003` aplicadas. `packages/database` ya no usa el mock por defecto — el fallback a mock solo entra si se corre sin `.env.local` configurado.
 
-**`/admin` tiene autenticación real** (Supabase Auth vía `@supabase/ssr` + `middleware.ts` + chequeo de `admin_users` en el layout del panel) — no es un placeholder. Falta que el usuario aplique `supabase/migrations/0002_admin_users_self_read.sql` y cree el primer usuario admin (pasos exactos en `Pendientes/Preguntas-abiertas.md`).
+**`/admin` tiene autenticación real** (Supabase Auth vía `@supabase/ssr` + `middleware.ts` + chequeo de `admin_users`), con un primer usuario admin ya creado.
+
+**PlenaPet Health** (nuevo, 2026-08-17): módulo de bienestar/edad biológica de mascotas, deliberadamente separado del petshop en la UX (`/health`, layout y header propios) aunque comparte cuenta de cliente y dominio. Flujo: cliente se registra (`/cuenta/registro`) → agrega mascota → completa encuesta de bienestar → el equipo interno carga resultados de laboratorio en `/admin/salud` (borrador → publicar) → el cliente ve un dashboard consolidado en `/health/mascotas/[id]` con puntaje por sistema/órgano y una **edad biológica estimada** (heurística propia y transparente, explícitamente etiquetada como indicador orientativo, no como diagnóstico clínico — ver `Iniciativas/Vitalidad-y-Longevidad.md`). Construido con Supabase real directo, sin mock (a diferencia del catálogo/pedidos). **Nadie ha probado el flujo completo en el navegador todavía** — es lo primero que verificar en la próxima sesión si no se ha hecho ya.
 
 **Nota de credenciales**: no hay ninguna identidad de git ni credenciales de push guardadas en esta máquina de forma persistente (a propósito, así se decidió). Cualquier push futuro necesita que quien lo haga aporte sus propias credenciales.
 
