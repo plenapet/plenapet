@@ -80,6 +80,27 @@ El usuario preguntó explícitamente cómo vincular el algoritmo clínicamente v
 
 **Decisión de cómo presentarlo**: en vez de un solo número "mágico" fingiendo validación total, PlenaPet debe ser honesto pieza por pieza — citar el Canine Frailty Index para la encuesta, IRIS para renal (ambos reales y verificables), y dejar claro que la "edad biológica" consolidada es la síntesis propia de PlenaPet de esas piezas. Es más creíble que inventar una validación que no existe, y es coherente con la regla de marca de nunca prometer resultados clínicos.
 
+## El paper de Banzato et al. 2019 — leído completo (2026-08-17)
+
+El usuario compartió el PDF completo del artículo (*Scientific Reports* 9:16749, open access CC-BY 4.0 — se puede citar y reutilizar la metodología libremente citando la fuente). Esto confirma y precisa lo que antes era una referencia genérica:
+
+**Metodología exacta del Frailty Index (FI)**:
+- 33 déficits de salud, elegidos con 3 criterios: (1) se relacionan negativamente con la salud, (2) aumentan con la edad, (3) ni muy raros ni muy frecuentes (evitan saturación). No se restringen a un solo sistema — deben cubrir varios, igual que hace `HEALTH_SYSTEMS` en el código.
+- Cada déficit se puntúa 0 (ausente), 0.5 (leve) o 1 (presente/severo) — **exactamente el mismo esquema de "deficit" 0/0.5/1 que ya usa `wellness-survey.ts`**.
+- FI = suma de puntajes / 33 (número de ítems) → valor 0–1. PlenaPet lo muestra invertido a escala 0–100 (100 = sin déficits) — conversión directa, mismo cálculo.
+- Basado en el "standard procedure" de Searle et al. 2008 (*BMC Geriatrics*, también open access) — el método genérico de construcción de índices de fragilidad, reutilizado y adaptado a perros por Banzato.
+
+**Resultados citables (N=401 perros, seguimiento 6 meses, Hospital Veterinario Universidad de Padua)**:
+- FI medio general: 0.14 (DE 0.13). Por edad: jóvenes (2-6a) 0.08, medianos (7-10a) 0.11, viejos (10+a) 0.23.
+- Correlación FI-edad: Spearman rho=0.51, p<0.001 — pero al combinar FI y edad en el modelo de riesgo, la edad sola dejó de ser significativa (p=0.343): **el FI captura más información pronóstica que la edad cronológica sola**, justificación directa de por qué PlenaPet combina encuesta + laboratorio en vez de mostrar solo la edad.
+- Predicción de mortalidad a 6 meses: AUC=0.852 (IC95% 0.814–0.885) con punto de corte FI=0.25 (score=75 en nuestra escala invertida): sensibilidad 70%, especificidad 88.56%.
+- Categorías de riesgo (usadas para Kaplan-Meier): FI<0.2 (score>80) referencia · FI 0.2–0.4 (score 60–80) HR=9.21 (IC95% 4.05–20.96) · FI≥0.4 (score<60) HR=18.06 (IC95% 6.54–49.88). **Estos cortes (80 y 60) ya coinciden exactamente con los umbrales que `scoreToStatus()` tenía implementados de antes** — coincidencia útil, ya no hace falta cambiar el código, solo citar la fuente real en vez de una justificación genérica.
+- Condición corporal (BCS, escala WSAVA 1-9): protectora — sobrepeso (BCS>6) tuvo HR=0.38 vs. bajo peso (BCS<5) ("paradoja de la obesidad", también descrita en humanos). **No se implementó como "sobrepeso = bueno"** en el puntaje de PlenaPet a propósito: el sobrepeso sigue siendo un riesgo real y bien documentado para articulaciones/diabetes a mediano plazo, y sería irresponsable como marca sugerir lo contrario solo por este hallazgo puntual de un estudio. Se agregó como pregunta nueva de la encuesta (`general_condicion_corporal`) con un deficit leve (0.3) para sobrepeso, con el razonamiento documentado en el código.
+
+**Dos brechas honestas que quedan (no resueltas, hay que decidir qué hacer)**:
+1. **El Anexo 1 (listado literal de los 33 ítems) no vino en el PDF compartido** — el artículo principal no lo incluye, solo lo referencia ("attached as Annex 1"). Habría que conseguirlo desde el link de "Supplementary information" en la página del artículo en nature.com (`doi.org/10.1038/s41598-019-52585-9`), que normalmente es un PDF/documento aparte del artículo principal. Mientras tanto, los 16 ítems propios de PlenaPet siguen los mismos 3 criterios de inclusión del estudio, pero no son una réplica literal.
+2. **El FI del estudio lo calculaba un veterinario** combinando examen clínico + entrevista al dueño + a veces pruebas diagnósticas — no es un autorreporte puro del dueño desde un formulario web, que es como está construido hoy en PlenaPet. Esto es una adaptación razonable pero reduce la confianza de que el puntaje de PlenaPet tenga exactamente la misma precisión predictiva reportada en el estudio. Una mejora futura sería que el puntaje de la encuesta también pueda ser revisado/ajustado por un veterinario antes de mostrarse como definitivo (mismo patrón `draft`/`published` que ya existe para los paneles de laboratorio).
+
 **Caminos de mediano/largo plazo (no implementados, quedan para cuando haya tracción)**:
 - Escribir a los autores del estudio de Purina/GeroScience para explorar colaboración académica (bajo costo, sin garantía de respuesta).
 - Alianza con una universidad veterinaria colombiana para co-validar el modelo propio con datos reales.

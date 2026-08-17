@@ -36,7 +36,9 @@ export default async function EncuestaPage({
       </h1>
       <p className="mt-1 text-sm text-gris-pizarra">
         Responde según cómo ha estado {pet.name} en las últimas semanas. Toma
-        unos 3 minutos.
+        unos 3 minutos. El cálculo del puntaje sigue la misma fórmula de un
+        índice de fragilidad validado en un estudio con 401 perros, publicado
+        en <em>Scientific Reports</em> (Banzato et al., 2019).
       </p>
 
       {searchParams.error && (

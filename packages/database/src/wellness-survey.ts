@@ -1,10 +1,29 @@
 import type { HealthSystemKey } from "./health-types";
 
 /**
- * Encuesta de bienestar propia de PlenaPet — preguntas propias, pero el
- * enfoque de puntaje (acumulación de déficits de salud observables) sigue
- * la misma lógica que el "índice de fragilidad" publicado por el Dog Aging
- * Project. Ver vault/Iniciativas/Vitalidad-y-Longevidad.md.
+ * Encuesta de bienestar propia de PlenaPet — preguntas propias, pero la
+ * fórmula de puntaje replica exactamente el "Frailty Index" (FI) validado
+ * en perros por Banzato et al. 2019 (Scientific Reports, revisado por
+ * pares, open access): suma de los puntajes de déficit dividida entre el
+ * número de ítems, dando un valor 0–1 (acá lo mostramos invertido a 0–100,
+ * donde 100 = sin déficits). Ver vault/Iniciativas/Vitalidad-y-Longevidad.md
+ * para el detalle completo de la investigación.
+ *
+ * Diferencia honesta con el estudio original: allí el FI lo calculaba un
+ * veterinario combinando el examen clínico + la entrevista al dueño; acá es
+ * autorreporte del dueño desde un formulario web. Es una adaptación
+ * razonable del método, no una réplica exacta de la validación (que exigiría
+ * evaluación veterinaria). El listado literal de los 33 ítems del estudio
+ * (Anexo 1) no estaba disponible al construir esta versión — estos 16 ítems
+ * propios se diseñaron siguiendo los mismos 3 criterios de inclusión que usó
+ * el estudio: (1) el déficit se relaciona negativamente con la salud, (2)
+ * aumenta con la edad, (3) no es ni demasiado raro ni demasiado frecuente.
+ *
+ * Cortes de riesgo citables (del estudio, N=401 perros, seguimiento 6 meses):
+ * FI < 0.2 (score > 80) = fragilidad baja · FI 0.2–0.4 (score 60–80) =
+ * fragilidad moderada, HR=9.21 de mortalidad vs. baja · FI ≥ 0.4 (score < 60)
+ * = fragilidad alta, HR=18.06. El AUC de predicción de mortalidad a 6 meses
+ * fue 0.852 usando el punto de corte FI=0.25 (score=75).
  *
  * Cada opción de respuesta tiene un `deficit` de 0 (sin señal de alerta) a 1
  * (señal de alerta clara). El puntaje de un dominio es 100 menos el promedio
@@ -135,6 +154,24 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     domain: "general",
     text: "¿Tiene al día vacunas y desparasitación?",
     options: NO_ES_ALERTA,
+  },
+  {
+    id: "general_condicion_corporal",
+    domain: "general",
+    text: "¿Cómo describirías su condición corporal al tacto (costillas, cintura)?",
+    // Categorías tomadas literalmente de Banzato et al. 2019 (escala WSAVA:
+    // bajo peso <5, normal 5-6, sobrepeso >6 sobre 9). En ese estudio el
+    // sobrepeso tuvo un efecto protector sobre la mortalidad a 6 meses
+    // (HR=0.38 vs. bajo peso, la llamada "paradoja de la obesidad") — pero
+    // seguimos marcándolo como déficit leve porque el sobrepeso sí es un
+    // riesgo real y bien documentado para articulaciones, diabetes y otras
+    // condiciones a mediano/largo plazo; no sería responsable que PlenaPet
+    // diera a entender que el sobrepeso "no importa".
+    options: [
+      { value: "bajo_peso", label: "Se notan las costillas y la columna fácilmente (bajo peso)", deficit: 1 },
+      { value: "normal", label: "Cintura visible, costillas se sienten con presión leve (normal)", deficit: 0 },
+      { value: "sobrepeso", label: "Cuesta sentir las costillas, poca o ninguna cintura (sobrepeso)", deficit: 0.3 },
+    ],
   },
   {
     id: "general_energia",

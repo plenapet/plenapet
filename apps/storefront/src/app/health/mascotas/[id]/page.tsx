@@ -160,6 +160,14 @@ export default async function PetDashboardPage({
               <Badge tone={STATUS_TONE[scoreToStatus(overallScore)]}>
                 {STATUS_LABEL[scoreToStatus(overallScore)]}
               </Badge>
+              {overallScore < 60 && (
+                <p className="mt-2 text-xs text-gris-pizarra">
+                  Un puntaje bajo como este correspondió, en el estudio en
+                  que se basa esta encuesta (Banzato et al. 2019, 401
+                  perros), a un riesgo de mortalidad a 6 meses hasta 18 veces
+                  mayor — vale la pena una consulta veterinaria.
+                </p>
+              )}
             </>
           ) : (
             <p className="mt-2 text-sm text-gris-pizarra">
@@ -185,7 +193,8 @@ export default async function PetDashboardPage({
           )}
           <p className="mt-2 text-xs text-azul-confianza/70">
             Indicador orientativo propio de PlenaPet, no un diagnóstico
-            clínico — combina la encuesta de bienestar y, si existen,
+            clínico — combina el índice de vitalidad (que sí replica una
+            fórmula publicada y validada, ver abajo) y, si existen,
             resultados de laboratorio. Ante cualquier duda, consulta con tu
             veterinario.
           </p>
