@@ -153,3 +153,11 @@ El usuario pidió integrar Resend "para todo lo que necesite notificar la plataf
 **Explícitamente no se construyó** un email de "confirmación de pedido": el checkout (`/checkout`) todavía es solo interfaz, sin backend de pedidos ni webhook de Wompi (ver [[Pagos-Wompi]] y el roadmap) — no existe un trigger real que enganchar todavía. Se deja como fast-follow obvio para cuando se construya esa pieza, no como código sin usar hoy.
 
 **Hallazgo operativo importante** (encontrado probando el envío real, no asumido): la cuenta de Resend está en modo sandbox porque no hay dominio verificado — **solo puede enviar a `plenapetmed@gmail.com`**, el correo dueño de la cuenta. Cualquier email a un cliente real de PlenaPet no se entrega todavía (falla silenciosamente para el usuario final; el error queda logueado del lado del servidor, no rompe el flujo). Mismo pendiente de dominio real de siempre, ahora con una consecuencia funcional concreta — ver [[Preguntas-abiertas]].
+
+## 2026-08-18 — Dominio real confirmado: `plenapet.com`
+
+El usuario verificó `plenapet.com` en resend.com/domains, resolviendo de una vez dos pendientes que dependían del mismo bloqueante (dominio real): el sandbox de Resend y el placeholder de SEO.
+
+- `EMAIL_FROM` pasa de `onboarding@resend.dev` a `PlenaPet <notificaciones@plenapet.com>` — probado con un envío real a un destinatario fuera de la cuenta de Resend (antes solo se podía enviar al dueño de la cuenta), confirmando que la restricción de sandbox ya no aplica.
+- `NEXT_PUBLIC_SITE_URL` pasa de el placeholder `https://plenapet.co` a `https://plenapet.com` — afecta `sitemap.xml`, `robots.txt`, canonical y Open Graph.
+- **Todavía no está conectado en Vercel**: el dominio está verificado en Resend (para email) pero el proyecto de Vercel sigue sirviendo desde `plenapet-storefront.vercel.app` — falta agregar `plenapet.com` como dominio del proyecto (DNS) y replicar `RESEND_API_KEY`/`EMAIL_FROM`/`NEXT_PUBLIC_SITE_URL` actualizados como env vars de Vercel. Ver [[Preguntas-abiertas]].

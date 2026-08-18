@@ -24,16 +24,19 @@ Migraciones `0002_admin_users_self_read.sql` y `0003_pet_health.sql` aplicadas. 
 - **Decidir si la encuesta de bienestar necesita revisión veterinaria** antes de mostrarse al dueño (como ya pasa con los paneles de laboratorio) — el estudio en que se basa el puntaje fue calculado por un veterinario, no autorreportado por el dueño; hoy PlenaPet lo deja como autorreporte puro.
 - **Confirmar los cortes de estadificación IRIS** (`getIrisStage()`) contra la tabla vigente en iris-kidney.com antes de usarlos con pacientes reales — idealmente con el veterinario aliado.
 
-## Email transaccional / Resend (2026-08-17)
+## Resuelto — dominio `plenapet.com` confirmado y verificado en Resend (2026-08-18)
 
-- **Cuenta de Resend en modo sandbox**: sin dominio propio verificado en resend.com/domains, la API **solo permite enviar a `plenapetmed@gmail.com`** (el correo dueño de la cuenta Resend) — confirmado probando el envío real. Cualquier email de bienvenida/resultados/recomendación a un cliente real de PlenaPet **no llega** hoy (falla silenciosamente para el usuario — `sendEmail()` solo loguea el error del lado del servidor, no rompe el flujo, pero tampoco se entrega). Bloquea con el mismo pendiente de siempre: el dominio real (ver sección de SEO más abajo). En cuanto haya dominio, verificarlo en resend.com/domains y cambiar `EMAIL_FROM` en `.env.local`/Vercel de `onboarding@resend.dev` a una dirección `@dominio-real`.
-- **`RESEND_API_KEY` solo está en `.env.local`** (no commiteado) — falta agregarla también como env var en el proyecto de Vercel para que los emails funcionen en producción (mismo paso que se hizo para las de Supabase).
-- No se ha probado el flujo completo end-to-end en el navegador (registrarse y confirmar que llega el correo de bienvenida) — sí se confirmó por fuera que la API de Resend y la key funcionan (envío de prueba exitoso a `plenapetmed@gmail.com`).
+`plenapet.com` es el dominio real. Se verificó en resend.com/domains y ya se probó envío real sin restricción de sandbox. Actualizado en código: `EMAIL_FROM="PlenaPet <notificaciones@plenapet.com>"` y `NEXT_PUBLIC_SITE_URL=https://plenapet.com` (antes placeholder `plenapet.co`) en `.env.local`/`.env.example`. **Pendiente**: replicar estas mismas env vars en el proyecto de Vercel (hoy solo están locales) y conectar el dominio real en Vercel (DNS) — hasta entonces el sitio en producción sigue en `plenapet-storefront.vercel.app`.
 
-## SEO (2026-08-17) — ver [[SEO]] para el detalle completo
+## Email transaccional / Resend (2026-08-17, actualizado 2026-08-18)
 
-- **Dominio real**: sitemap.xml, robots.txt, Open Graph y canonical usan el placeholder `https://plenapet.co` (`NEXT_PUBLIC_SITE_URL`) hasta que haya un dominio confirmado — mismo pendiente que ya existía, ahora con más cosas dependiendo de él.
-- **Verificar el sitio en Google Search Console** en cuanto haya dominio — sin esto no hay forma de medir si el SEO está funcionando ni de saber qué keywords realmente traen tráfico.
+- **`RESEND_API_KEY` solo está en `.env.local`** (no commiteado) — falta agregarla también como env var en el proyecto de Vercel para que los emails funcionen en producción (mismo paso que se hizo para las de Supabase). Ahora que el dominio está verificado, también hay que actualizar `EMAIL_FROM` en Vercel a `notificaciones@plenapet.com`.
+- No se ha probado el flujo completo end-to-end en el navegador (registrarse y confirmar que llega el correo de bienvenida con el remitente real) — sí se confirmó por fuera que la API de Resend, la key y ahora el dominio verificado funcionan (envíos de prueba exitosos, incluido uno a un destinatario fuera de la cuenta de Resend).
+
+## SEO (2026-08-17, actualizado 2026-08-18) — ver [[SEO]] para el detalle completo
+
+- ~~Dominio real~~ — **resuelto**: `plenapet.com` ya está confirmado, `NEXT_PUBLIC_SITE_URL` actualizado. Falta conectarlo de verdad en Vercel (DNS) para que sitemap.xml/robots.txt/Open Graph/canonical sirvan URLs que respondan en producción y no solo en `.vercel.app`.
+- **Verificar el sitio en Google Search Console** ahora que ya hay dominio confirmado — sin esto no hay forma de medir si el SEO está funcionando ni de saber qué keywords realmente traen tráfico.
 - **Decidir si se invierte en contenido/blog**: la investigación confirmó que Laika gana buena parte de su tráfico con contenido educativo (`blog.laika.com.co`). PlenaPet Health tiene un ángulo diferenciador real (prevención con datos, nadie más lo ofrece en Colombia) pero hoy solo existe la landing — no se escribieron artículos de blog todavía.
 - **Fotografía real de producto**: bloquea que el rich result de `Product` en Google se vea completo (hoy no manda `image` porque no hay fotos reales) — mismo pendiente de siempre, ahora con impacto directo en SEO también.
 - **Desplegar `apps/storefront` en Vercel** como el único proyecto — configurar `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY`.
@@ -44,7 +47,7 @@ Migraciones `0002_admin_users_self_read.sql` y `0003_pet_health.sql` aplicadas. 
 ## Bloqueantes para producción (no para empezar a construir)
 
 - **Entidad legal / NIT de PlenaPet**: para facturación, términos y condiciones, política de tratamiento de datos y la cuenta de Wompi. Debe ser distinta de la razón social visible de VetShipping (independencia de marca + separación de flujos de dinero). ¿Ya existe una sociedad/NIT para PlenaPet o hay que constituirla?
-- **Dominio**: ¿cuál es el dominio definitivo (`plenapet.com`, `.co`, otro)? Necesario para configurar Vercel/DNS/email transaccional desde Fase 0.
+- ~~Dominio~~ — **resuelto (2026-08-18)**: `plenapet.com`. Falta conectarlo en Vercel (DNS), ver sección de arriba.
 - **Cuenta comercial de Wompi**: se puede arrancar en sandbox sin esto, pero producción la necesita, a nombre de la entidad legal de PlenaPet.
 
 ## Necesarios para Fase 1 (diseño/desarrollo)
@@ -58,4 +61,4 @@ Migraciones `0002_admin_users_self_read.sql` y `0003_pet_health.sql` aplicadas. 
 
 - Logística de última milla / zonas de cobertura y tarifas de envío — impacta el cálculo de `shipping_cents` en checkout.
 - Política de productos que requieren fórmula/prescripción: ¿PlenaPet los vende libremente con advertencia (como indica el manual de marca) o hay alguna restricción regulatoria colombiana adicional a validar con un abogado?
-- Nombre/marca legal para las comunicaciones de WhatsApp Business y remitente de email transaccional.
+- Nombre/marca legal para las comunicaciones de WhatsApp Business (el remitente de email transaccional ya quedó definido: `notificaciones@plenapet.com`).

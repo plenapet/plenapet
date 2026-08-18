@@ -1,7 +1,7 @@
 ---
 tipo: iniciativa
 proyecto: PlenaPet
-estado: v1 técnica implementada (2026-08-17) — falta contenido/dominio real y medición
+estado: v1 técnica implementada (2026-08-17), dominio real confirmado (2026-08-18) — falta contenido y medición
 actualizado: 2026-08-17
 ---
 
@@ -49,14 +49,14 @@ El middleware, el header (`HealthHeader`, ahora funciona logueado o no) y todos 
 
 - `app/sitemap.ts` — sitemap dinámico: home, `/productos`, `/health`, todas las categorías y todos los productos activos.
 - `app/robots.ts` — permite todo excepto `/admin`, `/cuenta`, `/health/mascotas`, `/carrito`, `/checkout`.
-- `src/lib/site-url.ts` — constante `SITE_URL` (env `NEXT_PUBLIC_SITE_URL`, con placeholder `https://plenapet.co` hasta que haya dominio real — **actualizar ahí, no en cada archivo**).
+- `src/lib/site-url.ts` — constante `SITE_URL` (env `NEXT_PUBLIC_SITE_URL`, ya en `https://plenapet.com` — dominio real confirmado 2026-08-18 — **actualizar ahí, no en cada archivo**).
 - **JSON-LD**: `OnlineStore` + `SearchAction` en home; `Product` (con `Offer`, precio, disponibilidad) y `BreadcrumbList` en ficha de producto y catálogo; `FAQPage` en la landing de Health.
 - **Metadata**: `metadataBase`, Open Graph y Twitter card por defecto en el layout raíz; `canonical` explícito en producto, catálogo y categorías (los filtros que no son categoría —marca, precio, etapa— no generan variantes canónicas aparte, para no diluir con contenido casi-duplicado); páginas de búsqueda interna (`?q=`) marcadas `noindex` a propósito.
 - Títulos/descripciones reescritos con las keywords reales investigadas (precio, domicilio, Colombia, por especie) sin caer en keyword stuffing — se mantiene el tono del manual de marca.
 
 ## Qué falta (pendiente, no bloquea lo ya construido)
 
-- **Dominio real** — sitemap/robots/OG usan el placeholder `plenapet.co`; hay que actualizar `NEXT_PUBLIC_SITE_URL` en Vercel en cuanto haya dominio confirmado (ver `Preguntas-abiertas.md`).
+- ~~Dominio real~~ — resuelto (`plenapet.com`, 2026-08-18). Falta replicar `NEXT_PUBLIC_SITE_URL` en Vercel y conectar el dominio ahí mismo (DNS) — ver `Preguntas-abiertas.md`.
 - **Fotografía real de producto** — Google Shopping/rich results de `Product` funcionan mucho mejor con imagen; hoy no hay `image` en el schema porque no hay fotos reales todavía.
 - **Contenido/blog** — Laika gana gran parte de su tráfico orgánico con contenido educativo. PlenaPet Health ya tiene el ángulo diferenciador (prevención con datos); falta escribir artículos long-tail reales (ej. "cómo saber si mi perro tiene enfermedad renal temprana", "qué es un hemograma en perros") — no se escribió contenido de blog en esta pasada, solo la landing.
 - **SEO local** (páginas o contenido por ciudad) — se identificó como oportunidad pero no se construyó.
