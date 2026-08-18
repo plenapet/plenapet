@@ -140,3 +140,16 @@ Ver investigación completa (fuentes, qué SÍ es adoptable de la ciencia public
 ## 2026-08-14 — Separación de datos con VetShipping
 
 - Decisión: el proyecto de Supabase de PlenaPet debe ser **independiente** del que use VetShipping (si aplica), no una instancia compartida. Razón: independencia de marca ante el consumidor + aislamiento de seguridad entre un negocio B2B y uno B2C con datos de pago de consumidores finales.
+
+## 2026-08-17 — Resend como proveedor de email transaccional
+
+El usuario pidió integrar Resend "para todo lo que necesite notificar la plataforma". Antes de escribir código se investigó qué triggers reales existen hoy (no había ningún envío de email en el código: la única pieza que manda correo hoy es Supabase Auth mismo, con su email de confirmación de registro).
+
+**Construido**: paquete nuevo `packages/email` (mismo patrón que `@plenapet/database`/`@plenapet/ui`) con un cliente Resend, un `sendEmail()` que **nunca lanza** (best-effort: si falla, solo loguea — no hay cola/reintentos todavía, y un email caído no puede tumbar una acción real como crear cuenta o publicar resultados) y plantillas HTML con los colores/tono de marca. Enganchado en tres puntos reales:
+- Bienvenida al registrarse (`customer-auth.ts`, `signUpAction`).
+- Resultados de laboratorio publicados (`admin-health.ts`, `publishLabPanelAction`) — resuelve el email del dueño con `supabase.auth.admin.getUserById(pet.customer_id)` porque `profiles` no guarda email, solo vive en `auth.users`.
+- Nueva recomendación de salud (`admin-health.ts`, `addHealthRecommendationAction`).
+
+**Explícitamente no se construyó** un email de "confirmación de pedido": el checkout (`/checkout`) todavía es solo interfaz, sin backend de pedidos ni webhook de Wompi (ver [[Pagos-Wompi]] y el roadmap) — no existe un trigger real que enganchar todavía. Se deja como fast-follow obvio para cuando se construya esa pieza, no como código sin usar hoy.
+
+**Hallazgo operativo importante** (encontrado probando el envío real, no asumido): la cuenta de Resend está en modo sandbox porque no hay dominio verificado — **solo puede enviar a `plenapetmed@gmail.com`**, el correo dueño de la cuenta. Cualquier email a un cliente real de PlenaPet no se entrega todavía (falla silenciosamente para el usuario final; el error queda logueado del lado del servidor, no rompe el flujo). Mismo pendiente de dominio real de siempre, ahora con una consecuencia funcional concreta — ver [[Preguntas-abiertas]].

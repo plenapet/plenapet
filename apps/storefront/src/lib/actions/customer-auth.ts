@@ -2,6 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { sendEmail, welcomeEmailSubject, welcomeEmailHtml } from "@plenapet/email";
+import { SITE_URL } from "@/lib/site-url";
 
 export async function signUpAction(formData: FormData) {
   const email = String(formData.get("email") ?? "");
@@ -19,6 +21,12 @@ export async function signUpAction(formData: FormData) {
   if (error) {
     redirect(`/cuenta/registro?error=${encodeURIComponent(error.message)}&next=${encodeURIComponent(next)}`);
   }
+
+  await sendEmail({
+    to: email,
+    subject: welcomeEmailSubject(),
+    html: welcomeEmailHtml({ fullName, ctaUrl: `${SITE_URL}${next}` }),
+  });
 
   if (!data.session) {
     // El proyecto exige confirmar el correo antes de iniciar sesión.

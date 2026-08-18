@@ -14,6 +14,7 @@ actualizado: 2026-08-14
 | Estilos / UI | **Tailwind CSS** con tokens de marca + **shadcn/ui** como base de componentes (headless, se re-skinnea 100% con la paleta PlenaPet) | Velocidad de desarrollo sin sacrificar un diseño propio y "premium". |
 | Base de datos / backend | **Supabase** (Postgres + Auth + Storage + Edge Functions + `pg_cron`) | Un solo proveedor para DB, auth, storage y jobs programados; RLS nativo de Postgres para separar datos públicos/admin/internos. |
 | Pagos | **Wompi** (Colombia): Widget de Checkout embebido + Webhooks | Tarjetas, PSE, Nequi. Firma de integridad generada server-side, nunca en el cliente. |
+| Email transaccional | **Resend** (`packages/email`, integrado 2026-08-17) | Bienvenida al registrarse, resultados de laboratorio publicados, nuevas recomendaciones de PlenaPet Health. Cuenta propia de PlenaPet (independencia de marca), no la de VetShipping. |
 | Hosting/deploy | **Vercel** (un solo proyecto) | Preview deployments por PR. Se evaluó separar storefront/admin en dos proyectos y se decidió unificar el 2026-08-17 — ver [[Registro-de-decisiones]]. |
 | Repo | **GitHub**, monorepo | Un solo lugar para todo el código; permisos por CODEOWNERS cuando el equipo externo entre a operar la marca. |
 | Automatización de catálogo | **Supabase Edge Functions + pg_cron** | Job de sincronización de catálogo desacoplado de VetShipping en tiempo de ejecución del sitio (ver [[Integracion-VetShipping]]). |
@@ -34,6 +35,7 @@ WEB PLENAPET/            (raíz del repo)
 ├── packages/
 │   ├── ui/                   # Design system: tokens de marca, componentes compartidos
 │   ├── database/              # Tipos generados de Supabase, queries compartidas, migraciones SQL
+│   ├── email/                  # Cliente Resend + plantillas HTML con marca (implementado 2026-08-17)
 │   ├── integrations/
 │   │   └── vetshipping/       # Adapter pattern de sincronización de catálogo (ver nota dedicada)
 │   ├── payments/               # Cliente Wompi, verificación de firma, tipos de webhook

@@ -3,6 +3,34 @@
 import { redirect } from "next/navigation";
 import { getServiceSupabaseClient } from "@plenapet/database";
 import { requireAdminUserId, requireSuperAdminUserId } from "@/lib/auth/require-admin";
+import {
+  sendEmail,
+  labResultsReadyEmailSubject,
+  labResultsReadyEmailHtml,
+  newRecommendationEmailSubject,
+  newRecommendationEmailHtml,
+} from "@plenapet/email";
+import { SITE_URL } from "@/lib/site-url";
+
+/** Resuelve nombre de la mascota + email del dueño para notificarlo. `profiles` no guarda email — vive solo en auth.users. */
+async function getPetOwnerContact(
+  supabase: ReturnType<typeof getServiceSupabaseClient>,
+  petId: string,
+): Promise<{ petName: string; ownerEmail: string } | null> {
+  const { data: pet } = await supabase
+    .from("pets")
+    .select("name, customer_id")
+    .eq("id", petId)
+    .single();
+
+  if (!pet) return null;
+
+  const { data: userData } = await supabase.auth.admin.getUserById(pet.customer_id);
+  const ownerEmail = userData?.user?.email;
+  if (!ownerEmail) return null;
+
+  return { petName: pet.name, ownerEmail };
+}
 
 export async function createLabPanelAction(formData: FormData) {
   await requireAdminUserId();
@@ -83,6 +111,18 @@ export async function publishLabPanelAction(formData: FormData) {
     })
     .eq("id", labPanelId);
 
+  const contact = await getPetOwnerContact(supabase, petId);
+  if (contact) {
+    await sendEmail({
+      to: contact.ownerEmail,
+      subject: labResultsReadyEmailSubject(contact.petName),
+      html: labResultsReadyEmailHtml({
+        petName: contact.petName,
+        ctaUrl: `${SITE_URL}/health/mascotas/${petId}`,
+      }),
+    });
+  }
+
   redirect(`/admin/salud/${petId}`);
 }
 
@@ -119,17 +159,33 @@ export async function addHealthRecommendationAction(formData: FormData) {
 
   const supabase = getServiceSupabaseClient();
   const relatedProductId = String(formData.get("relatedProductId") ?? "").trim();
+  const title = String(formData.get("title") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim() || null;
   const { error } = await supabase.from("health_recommendations").insert({
     pet_id: petId,
     source: "manual",
-    title: String(formData.get("title") ?? "").trim(),
-    description: String(formData.get("description") ?? "").trim() || null,
+    title,
+    description,
     severity: String(formData.get("severity") ?? "info"),
     related_product_id: relatedProductId || null,
   });
 
   if (error) {
     redirect(`/admin/salud/${petId}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  const contact = await getPetOwnerContact(supabase, petId);
+  if (contact) {
+    await sendEmail({
+      to: contact.ownerEmail,
+      subject: newRecommendationEmailSubject(contact.petName),
+      html: newRecommendationEmailHtml({
+        petName: contact.petName,
+        title,
+        description,
+        ctaUrl: `${SITE_URL}/health/mascotas/${petId}`,
+      }),
+    });
   }
 
   redirect(`/admin/salud/${petId}`);

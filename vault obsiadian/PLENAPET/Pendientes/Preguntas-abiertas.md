@@ -24,6 +24,12 @@ Migraciones `0002_admin_users_self_read.sql` y `0003_pet_health.sql` aplicadas. 
 - **Decidir si la encuesta de bienestar necesita revisión veterinaria** antes de mostrarse al dueño (como ya pasa con los paneles de laboratorio) — el estudio en que se basa el puntaje fue calculado por un veterinario, no autorreportado por el dueño; hoy PlenaPet lo deja como autorreporte puro.
 - **Confirmar los cortes de estadificación IRIS** (`getIrisStage()`) contra la tabla vigente en iris-kidney.com antes de usarlos con pacientes reales — idealmente con el veterinario aliado.
 
+## Email transaccional / Resend (2026-08-17)
+
+- **Cuenta de Resend en modo sandbox**: sin dominio propio verificado en resend.com/domains, la API **solo permite enviar a `plenapetmed@gmail.com`** (el correo dueño de la cuenta Resend) — confirmado probando el envío real. Cualquier email de bienvenida/resultados/recomendación a un cliente real de PlenaPet **no llega** hoy (falla silenciosamente para el usuario — `sendEmail()` solo loguea el error del lado del servidor, no rompe el flujo, pero tampoco se entrega). Bloquea con el mismo pendiente de siempre: el dominio real (ver sección de SEO más abajo). En cuanto haya dominio, verificarlo en resend.com/domains y cambiar `EMAIL_FROM` en `.env.local`/Vercel de `onboarding@resend.dev` a una dirección `@dominio-real`.
+- **`RESEND_API_KEY` solo está en `.env.local`** (no commiteado) — falta agregarla también como env var en el proyecto de Vercel para que los emails funcionen en producción (mismo paso que se hizo para las de Supabase).
+- No se ha probado el flujo completo end-to-end en el navegador (registrarse y confirmar que llega el correo de bienvenida) — sí se confirmó por fuera que la API de Resend y la key funcionan (envío de prueba exitoso a `plenapetmed@gmail.com`).
+
 ## SEO (2026-08-17) — ver [[SEO]] para el detalle completo
 
 - **Dominio real**: sitemap.xml, robots.txt, Open Graph y canonical usan el placeholder `https://plenapet.co` (`NEXT_PUBLIC_SITE_URL`) hasta que haya un dominio confirmado — mismo pendiente que ya existía, ahora con más cosas dependiendo de él.
