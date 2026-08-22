@@ -22,6 +22,10 @@ export class MockProductRepository implements ProductRepository {
   async listInactive() {
     return products.filter((p) => !p.active);
   }
+
+  async getById(id: string) {
+    return products.find((p) => p.id === id) ?? null;
+  }
 }
 
 export class MockCategoryRepository implements CategoryRepository {

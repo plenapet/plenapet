@@ -6,6 +6,9 @@ import {
 } from "@plenapet/database";
 import { Badge, formatCOP } from "@plenapet/ui";
 import { Topbar } from "@/components/admin/Topbar";
+import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
+import { getCurrentAdmin } from "@/lib/auth/require-admin";
+import { unpublishProductAction, deleteProductAction } from "@/lib/actions/admin-catalog";
 
 const STOCK_LABEL: Record<string, string> = {
   in_stock: "En stock",
@@ -13,12 +16,19 @@ const STOCK_LABEL: Record<string, string> = {
   out_of_stock: "Agotado",
 };
 
-export default async function CatalogoPage() {
-  const [products, categories, brands] = await Promise.all([
+export default async function CatalogoPage({
+  searchParams,
+}: {
+  searchParams: { error?: string };
+}) {
+  const [products, categories, brands, currentAdmin] = await Promise.all([
     getProductRepository("admin").listActive(),
     getCategoryRepository("admin").listAll(),
     getBrandRepository("admin").listAll(),
+    getCurrentAdmin(),
   ]);
+
+  const isSuperAdmin = currentAdmin?.role === "super_admin";
 
   const categoryName = (id: string) =>
     categories.find((c) => c.id === id)?.name ?? id;
@@ -50,6 +60,12 @@ export default async function CatalogoPage() {
           </div>
         </div>
 
+        {searchParams.error && (
+          <div className="mt-4 rounded-card border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {searchParams.error}
+          </div>
+        )}
+
         <div className="mt-6 overflow-x-auto rounded-card border border-azul-confianza/10 bg-white shadow-card">
           <table className="w-full text-sm">
             <thead>
@@ -60,6 +76,7 @@ export default async function CatalogoPage() {
                 <th className="px-5 py-3">Precio</th>
                 <th className="px-5 py-3">Stock</th>
                 <th className="px-5 py-3">Fórmula</th>
+                <th className="px-5 py-3"></th>
               </tr>
             </thead>
             <tbody>
@@ -92,6 +109,40 @@ export default async function CatalogoPage() {
                   </td>
                   <td className="px-5 py-3 text-gris-pizarra">
                     {product.requiresPrescription ? "Sí" : "—"}
+                  </td>
+                  <td className="px-5 py-3">
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/admin/catalogo/${product.id}?from=/admin/catalogo`}
+                        className="whitespace-nowrap rounded-full bg-azul-confianza/10 px-3 py-1.5 text-xs font-semibold text-azul-confianza"
+                      >
+                        Ver / Editar
+                      </Link>
+                      {isSuperAdmin && (
+                        <>
+                          <form action={unpublishProductAction}>
+                            <input type="hidden" name="productId" value={product.id} />
+                            <input type="hidden" name="redirectTo" value="/admin/catalogo" />
+                            <ConfirmSubmitButton
+                              confirmMessage={`¿Ocultar "${product.name}" de la tienda?`}
+                              className="whitespace-nowrap rounded-full border border-azul-confianza/20 px-3 py-1.5 text-xs font-semibold text-azul-confianza"
+                            >
+                              Ocultar
+                            </ConfirmSubmitButton>
+                          </form>
+                          <form action={deleteProductAction}>
+                            <input type="hidden" name="productId" value={product.id} />
+                            <input type="hidden" name="redirectTo" value="/admin/catalogo" />
+                            <ConfirmSubmitButton
+                              confirmMessage={`¿Borrar "${product.name}"? No se puede deshacer.`}
+                              className="whitespace-nowrap rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600"
+                            >
+                              Borrar
+                            </ConfirmSubmitButton>
+                          </form>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

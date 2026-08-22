@@ -48,7 +48,7 @@ Objetivo: tienda funcional de punta a punta + panel de administración operable 
 - [x] **Autenticación real** con Supabase Auth (`@supabase/ssr`) — `middleware.ts` protege todo `/admin/*` excepto `/admin/login`; el layout del panel además exige una fila activa en `admin_users`. Falta crear el primer usuario admin (ver [[Preguntas-abiertas]]).
 - [ ] Roles diferenciados (`super_admin`, `catalog_manager`, `order_manager`, `support`) — hoy solo se valida `active`, no el rol específico.
 - [x] Publicar/ocultar/borrar productos importados (`/admin/catalogo/borradores`, 2026-08-22) — ver arriba, migración de catálogo.
-- [ ] Edición de nombre/descripción/imágenes/márgenes de un producto ya importado — todavía no hay formulario de edición, solo publicar/borrar el borrador tal como llegó del import (la base de datos ya lo soporta vía `product_overrides`/`pricing_rules`).
+- [x] **Administración completa de catálogo** (2026-08-22) — `/admin/catalogo/[id]` es una pantalla de detalle/edición real: nombre, descripciones, marca, categoría, precio (+ precio antes de descuento), etapa de vida, presentación, stock, especie, fórmula/prescripción e imágenes (lista de URLs), con publicar/ocultar/borrar desde ahí mismo. Las listas (`/admin/catalogo` y `/admin/catalogo/borradores`) tienen acciones rápidas por fila (Ver/Editar, Ocultar, Borrar) además del link al detalle. Borrar sigue restringido a `super_admin` y falla explícitamente si el producto tiene pedidos asociados (protege el historial, no hace cascada forzada). Pendiente: edición de `margin_percent_override` vía `pricing_rules`/`product_overrides` (la tabla ya lo soporta, no hay UI todavía).
 - [ ] Botón "Sincronizar catálogo" conectado al adapter real (hoy está deshabilitado en la UI).
 
 **Diseño**

@@ -56,6 +56,16 @@ export class SupabaseProductRepository implements ProductRepository {
     if (error) throw error;
     return (data ?? []).map(mapProduct);
   }
+
+  async getById(id: string) {
+    const { data, error } = await this.client
+      .from("products")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+    if (error) throw error;
+    return data ? mapProduct(data) : null;
+  }
 }
 
 export class SupabaseCategoryRepository implements CategoryRepository {

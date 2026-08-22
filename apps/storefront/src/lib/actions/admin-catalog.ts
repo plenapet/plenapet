@@ -288,25 +288,117 @@ export async function importVetShippingCatalogAction(formData: FormData) {
   redirect(`/admin/catalogo/importar?${params.toString()}`);
 }
 
-/** Publica un producto importado (active=false -> true) tras revisarlo. */
-export async function publishProductDraftAction(formData: FormData) {
+/** Solo permite redirigir dentro de /admin — evita pasar una URL arbitraria por el formulario. */
+function safeRedirectTarget(value: FormDataEntryValue | null, fallback: string): string {
+  const str = typeof value === "string" ? value : "";
+  return str.startsWith("/admin/") ? str : fallback;
+}
+
+/** Publica un producto (active=false -> true) — cualquier admin activo, mismo criterio que el resto de "publicar". */
+export async function publishProductAction(formData: FormData) {
   await requireAdminUserId();
   const productId = String(formData.get("productId") ?? "");
+  const redirectTo = safeRedirectTarget(formData.get("redirectTo"), "/admin/catalogo/borradores");
 
   const supabase = getServiceSupabaseClient();
   await supabase.from("products").update({ active: true }).eq("id", productId);
 
-  redirect("/admin/catalogo/borradores");
+  redirect(redirectTo);
 }
 
-/** Solo super_admin: borra un borrador que no vale la pena publicar (ej. mal categorizado, duplicado real). */
-export async function deleteProductDraftAction(formData: FormData) {
+/** Solo super_admin: oculta un producto que ya estaba publicado (visible para clientes). */
+export async function unpublishProductAction(formData: FormData) {
   await requireSuperAdminUserId();
   const productId = String(formData.get("productId") ?? "");
+  const redirectTo = safeRedirectTarget(formData.get("redirectTo"), "/admin/catalogo");
+
+  const supabase = getServiceSupabaseClient();
+  await supabase.from("products").update({ active: false }).eq("id", productId);
+
+  redirect(redirectTo);
+}
+
+/** Solo super_admin: borra un producto (borrador o publicado). Falla si tiene pedidos reales asociados (protege el historial). */
+export async function deleteProductAction(formData: FormData) {
+  await requireSuperAdminUserId();
+  const productId = String(formData.get("productId") ?? "");
+  const redirectTo = safeRedirectTarget(formData.get("redirectTo"), "/admin/catalogo");
 
   const supabase = getServiceSupabaseClient();
   await supabase.from("product_overrides").delete().eq("product_id", productId);
-  await supabase.from("products").delete().eq("id", productId);
+  const { error } = await supabase.from("products").delete().eq("id", productId);
 
-  redirect("/admin/catalogo/borradores");
+  if (error) {
+    redirect(
+      `${redirectTo}?error=${encodeURIComponent(
+        `No se pudo borrar (probablemente tiene pedidos asociados): ${error.message}`,
+      )}`,
+    );
+  }
+
+  redirect(redirectTo);
+}
+
+/** Edita un producto — cualquier admin activo (no es una acción destructiva ni de visibilidad). */
+export async function updateProductAction(formData: FormData) {
+  await requireAdminUserId();
+  const productId = String(formData.get("productId") ?? "");
+  const redirectTo = safeRedirectTarget(
+    formData.get("redirectTo"),
+    `/admin/catalogo/${productId}`,
+  );
+
+  const name = String(formData.get("name") ?? "").trim();
+  const pricePesos = Number(formData.get("pricePesos"));
+
+  if (!name || !Number.isFinite(pricePesos) || pricePesos <= 0) {
+    redirect(
+      `${redirectTo}?error=${encodeURIComponent("Nombre y precio son obligatorios")}`,
+    );
+  }
+
+  const shortDescription = String(formData.get("shortDescription") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const categoryId = String(formData.get("categoryId") ?? "").trim() || null;
+  const brandId = String(formData.get("brandId") ?? "").trim() || null;
+  const lifeStage = String(formData.get("lifeStage") ?? "todas");
+  const presentation = String(formData.get("presentation") ?? "").trim() || null;
+  const stockStatus = String(formData.get("stockStatus") ?? "in_stock");
+  const requiresPrescription = formData.get("requiresPrescription") === "on";
+  const species = formData.getAll("species").map(String).filter(Boolean);
+  const compareAtRaw = String(formData.get("compareAtPesos") ?? "").trim();
+  const compareAtPesos = compareAtRaw ? Number(compareAtRaw) : null;
+  const images = String(formData.get("images") ?? "")
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const supabase = getServiceSupabaseClient();
+  const { error } = await supabase
+    .from("products")
+    .update({
+      name,
+      short_description: shortDescription || null,
+      description: description || null,
+      category_id: categoryId,
+      brand_id: brandId,
+      life_stage: lifeStage,
+      presentation,
+      stock_status: stockStatus,
+      requires_prescription: requiresPrescription,
+      species: species.length > 0 ? species : ["perro", "gato"],
+      price_cents: Math.round(pricePesos * 100),
+      compare_at_price_cents:
+        compareAtPesos && Number.isFinite(compareAtPesos)
+          ? Math.round(compareAtPesos * 100)
+          : null,
+      images,
+    })
+    .eq("id", productId);
+
+  if (error) {
+    redirect(`${redirectTo}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect(`${redirectTo}?ok=1`);
 }

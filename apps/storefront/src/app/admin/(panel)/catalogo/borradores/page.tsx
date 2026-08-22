@@ -8,10 +8,7 @@ import { formatCOP } from "@plenapet/ui";
 import { Topbar } from "@/components/admin/Topbar";
 import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
 import { getCurrentAdmin } from "@/lib/auth/require-admin";
-import {
-  publishProductDraftAction,
-  deleteProductDraftAction,
-} from "@/lib/actions/admin-catalog";
+import { publishProductAction, deleteProductAction } from "@/lib/actions/admin-catalog";
 
 export default async function BorradoresCatalogoPage() {
   const currentAdmin = await getCurrentAdmin();
@@ -83,8 +80,19 @@ export default async function BorradoresCatalogoPage() {
                     </td>
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-2">
-                        <form action={publishProductDraftAction}>
+                        <Link
+                          href={`/admin/catalogo/${product.id}?from=/admin/catalogo/borradores`}
+                          className="whitespace-nowrap rounded-full bg-azul-confianza/10 px-3 py-1.5 text-xs font-semibold text-azul-confianza"
+                        >
+                          Ver / Editar
+                        </Link>
+                        <form action={publishProductAction}>
                           <input type="hidden" name="productId" value={product.id} />
+                          <input
+                            type="hidden"
+                            name="redirectTo"
+                            value="/admin/catalogo/borradores"
+                          />
                           <button
                             type="submit"
                             className="whitespace-nowrap rounded-full bg-azul-confianza px-3 py-1.5 text-xs font-semibold text-white"
@@ -93,8 +101,13 @@ export default async function BorradoresCatalogoPage() {
                           </button>
                         </form>
                         {isSuperAdmin && (
-                          <form action={deleteProductDraftAction}>
+                          <form action={deleteProductAction}>
                             <input type="hidden" name="productId" value={product.id} />
+                            <input
+                              type="hidden"
+                              name="redirectTo"
+                              value="/admin/catalogo/borradores"
+                            />
                             <ConfirmSubmitButton
                               confirmMessage={`¿Borrar "${product.name}"? No se puede deshacer.`}
                               className="whitespace-nowrap rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600"
