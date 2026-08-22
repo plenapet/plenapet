@@ -10,6 +10,7 @@ export type ProductCardData = {
   compareAtPriceCents?: number | null;
   stockStatus: "in_stock" | "low_stock" | "out_of_stock";
   requiresPrescription: boolean;
+  imageUrl?: string | null;
 };
 
 export function ProductCard({
@@ -29,10 +30,19 @@ export function ProductCard({
       className="group block overflow-hidden rounded-card border border-azul-confianza/10 bg-white shadow-card transition-transform hover:-translate-y-0.5"
     >
       <div className="relative flex aspect-square items-center justify-center bg-crema-calido">
-        {/* TODO: reemplazar por fotografía real de empaque (regla de marca: producto real, sin alterar) */}
-        <span className="px-6 text-center text-sm font-medium text-gris-pizarra/60">
-          {product.name}
-        </span>
+        {product.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- viene de un bucket de Storage con dominio distinto según el proyecto de Supabase
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="h-full w-full object-contain p-4"
+          />
+        ) : (
+          // TODO: falta fotografía real para este producto (regla de marca: producto real, sin alterar)
+          <span className="px-6 text-center text-sm font-medium text-gris-pizarra/60">
+            {product.name}
+          </span>
+        )}
         {product.stockStatus === "out_of_stock" && (
           <span className="absolute left-3 top-3">
             <Badge tone="warning">Agotado</Badge>

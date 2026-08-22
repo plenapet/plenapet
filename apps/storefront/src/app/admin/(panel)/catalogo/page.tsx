@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   getBrandRepository,
   getCategoryRepository,
@@ -30,16 +31,23 @@ export default async function CatalogoPage() {
       <div className="p-8">
         <div className="flex items-center justify-between gap-4 rounded-card border border-dashed border-azul-confianza/25 bg-white p-4 text-sm text-gris-pizarra">
           <span>
-            Esto muestra el catálogo semilla de desarrollo. La sincronización
-            real con VetShipping y la edición de curaduría/márgenes se
-            conectan en la fase de Supabase.
+            Este listado solo muestra productos activos. Los que se importan
+            desde VetShipping quedan ocultos hasta que se revisan y publican.
           </span>
-          <button
-            disabled
-            className="whitespace-nowrap rounded-full bg-azul-confianza/10 px-4 py-2 text-sm font-semibold text-azul-confianza/50"
-          >
-            Sincronizar catálogo
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <Link
+              href="/admin/catalogo/borradores"
+              className="whitespace-nowrap rounded-full bg-azul-confianza/10 px-4 py-2 text-sm font-semibold text-azul-confianza"
+            >
+              Ver borradores
+            </Link>
+            <Link
+              href="/admin/catalogo/importar"
+              className="whitespace-nowrap rounded-full bg-azul-confianza px-4 py-2 text-sm font-semibold text-white"
+            >
+              Sincronizar catálogo
+            </Link>
+          </div>
         </div>
 
         <div className="mt-6 overflow-x-auto rounded-card border border-azul-confianza/10 bg-white shadow-card">

@@ -166,6 +166,7 @@ export default async function CatalogPage({
                         compareAtPriceCents: product.compareAtPriceCents,
                         stockStatus: product.stockStatus,
                         requiresPrescription: product.requiresPrescription,
+                        imageUrl: product.images?.[0] ?? null,
                       }}
                     />
                   );

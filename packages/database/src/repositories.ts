@@ -11,6 +11,8 @@ export interface ProductRepository {
   listActive(): Promise<Product[]>;
   listByCategory(categorySlug: string): Promise<Product[]>;
   getBySlug(slug: string): Promise<Product | null>;
+  /** Admin only: productos ocultos (active=false), ej. recién importados de VetShipping, pendientes de revisión. */
+  listInactive(): Promise<Product[]>;
 }
 
 export interface CategoryRepository {

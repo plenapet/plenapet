@@ -18,6 +18,10 @@ export class MockProductRepository implements ProductRepository {
   async getBySlug(slug: string) {
     return products.find((p) => p.slug === slug) ?? null;
   }
+
+  async listInactive() {
+    return products.filter((p) => !p.active);
+  }
 }
 
 export class MockCategoryRepository implements CategoryRepository {

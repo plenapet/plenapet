@@ -46,6 +46,16 @@ export class SupabaseProductRepository implements ProductRepository {
     if (error) throw error;
     return data ? mapProduct(data) : null;
   }
+
+  async listInactive() {
+    const { data, error } = await this.client
+      .from("products")
+      .select("*")
+      .eq("active", false)
+      .order("name");
+    if (error) throw error;
+    return (data ?? []).map(mapProduct);
+  }
 }
 
 export class SupabaseCategoryRepository implements CategoryRepository {

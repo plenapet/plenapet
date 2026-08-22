@@ -88,6 +88,7 @@ export default async function ProductPage({
             "@type": "Product",
             name: product.name,
             description: product.shortDescription || product.description,
+            image: product.images?.length ? product.images : undefined,
             brand: brand ? { "@type": "Brand", name: brand.name } : undefined,
             offers: {
               "@type": "Offer",
@@ -120,10 +121,19 @@ export default async function ProductPage({
 
       <div className="mt-4 grid gap-10 lg:grid-cols-2">
         <div className="flex aspect-square items-center justify-center rounded-card border border-azul-confianza/10 bg-crema-calido">
-          {/* TODO: fotografía real de empaque — ver regla de marca sobre imágenes de producto */}
-          <span className="px-10 text-center text-sm font-medium text-gris-pizarra/60">
-            {product.name}
-          </span>
+          {product.images?.[0] ? (
+            // eslint-disable-next-line @next/next/no-img-element -- viene de un bucket de Storage con dominio distinto según el proyecto de Supabase
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              className="h-full w-full object-contain p-8"
+            />
+          ) : (
+            // TODO: falta fotografía real para este producto — ver regla de marca sobre imágenes de producto
+            <span className="px-10 text-center text-sm font-medium text-gris-pizarra/60">
+              {product.name}
+            </span>
+          )}
         </div>
 
         <div>

@@ -45,6 +45,8 @@ export interface Product {
   stockStatus: StockStatus;
   requiresPrescription: boolean;
   active: boolean;
+  /** URLs públicas en el bucket "product-images" de Supabase Storage propio de PlenaPet. */
+  images?: string[];
   variants?: ProductVariant[];
 }
 

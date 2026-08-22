@@ -23,6 +23,7 @@ export * from "./wellness-survey";
 export * from "./health-scoring";
 export * from "./exam-catalog";
 export * from "./breeds";
+export * from "./vetshipping-import";
 export { isSupabaseConfigured, getServiceSupabaseClient } from "./supabase/client";
 
 /**

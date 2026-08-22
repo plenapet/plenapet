@@ -124,6 +124,7 @@ export default async function HomePage() {
                     compareAtPriceCents: product.compareAtPriceCents,
                     stockStatus: product.stockStatus,
                     requiresPrescription: product.requiresPrescription,
+                    imageUrl: product.images?.[0] ?? null,
                   }}
                 />
               );

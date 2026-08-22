@@ -19,6 +19,7 @@ export function mapProduct(row: any): Product {
     stockStatus: row.stock_status,
     requiresPrescription: row.requires_prescription,
     active: row.active,
+    images: row.images ?? [],
   };
 }
 

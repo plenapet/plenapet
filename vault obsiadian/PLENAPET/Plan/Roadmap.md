@@ -47,7 +47,8 @@ Objetivo: tienda funcional de punta a punta + panel de administración operable 
 - [x] Vista de pedidos (datos de demostración).
 - [x] **Autenticación real** con Supabase Auth (`@supabase/ssr`) — `middleware.ts` protege todo `/admin/*` excepto `/admin/login`; el layout del panel además exige una fila activa en `admin_users`. Falta crear el primer usuario admin (ver [[Preguntas-abiertas]]).
 - [ ] Roles diferenciados (`super_admin`, `catalog_manager`, `order_manager`, `support`) — hoy solo se valida `active`, no el rol específico.
-- [ ] Curaduría de catálogo editable (publicar/ocultar, nombre/descripción/imágenes, márgenes) — hoy es de solo lectura porque no hay UI de edición todavía (la base de datos ya lo soporta vía `product_overrides`/`pricing_rules`).
+- [x] Publicar/ocultar/borrar productos importados (`/admin/catalogo/borradores`, 2026-08-22) — ver arriba, migración de catálogo.
+- [ ] Edición de nombre/descripción/imágenes/márgenes de un producto ya importado — todavía no hay formulario de edición, solo publicar/borrar el borrador tal como llegó del import (la base de datos ya lo soporta vía `product_overrides`/`pricing_rules`).
 - [ ] Botón "Sincronizar catálogo" conectado al adapter real (hoy está deshabilitado en la UI).
 
 **Diseño**
@@ -65,7 +66,8 @@ Objetivo: tienda funcional de punta a punta + panel de administración operable 
   - [ ] Fast-follow: el propietario todavía no puede editar sus propios datos de mascota desde `/health/mascotas` (la base de datos ya lo permite vía RLS, falta la UI).
 - [x] **SEO técnico v1** — ver [[SEO]] (2026-08-17). Investigación de keywords/competencia (Laika, Puppis, Animal's y otros), landing pública de PlenaPet Health separada de la app (antes era imposible de indexar), sitemap.xml/robots.ts dinámicos, JSON-LD (Product, BreadcrumbList, FAQPage, OnlineStore), metadata/Open Graph/canonical. Dominio real (`plenapet.com`) confirmado 2026-08-18. **Pendiente**: conectar el dominio en Vercel, contenido/blog, Search Console, fotografía de producto para rich results.
 - [x] **Email transaccional con Resend** (`packages/email`, 2026-08-17, dominio verificado 2026-08-18) — cliente Resend + plantillas con marca, envío best-effort (nunca rompe la acción si falla, solo loguea). Enganchado en: bienvenida al registrarse (`signUpAction`), resultados de laboratorio publicados y nueva recomendación de salud (`admin-health.ts`, resuelve el email del dueño vía `auth.admin.getUserById` porque `profiles` no guarda email). Remitente `notificaciones@plenapet.com`, ya sin la restricción de sandbox (probado con envío real a un destinatario externo). **Pendiente**: agregar `RESEND_API_KEY`/`EMAIL_FROM` en Vercel. Sin backend de pedidos aún (checkout sigue siendo solo UI), no hay email de confirmación de pedido que enganchar todavía.
-- [ ] Automatizar sincronización (pasar de adapter CSV a API o BD replica, según lo que se resuelva con VetShipping).
+- [x] **Primera migración de catálogo desde VetShipping** (`/admin/catalogo/importar`, 2026-08-22) — adapter CSV v1 real (no el mock), ver [[Integracion-VetShipping]] y [[Registro-de-decisiones]]. Sube 3 CSV (productos, marcas, imágenes de VetShipping), calcula precio con el margen real (10%+10% compuesto), crea productos ocultos (`active=false`) para revisión en `/admin/catalogo/borradores` antes de publicar. Es idempotente (reintentar no duplica). Las imágenes se migran en un paso aparte (script, no server action) por el límite de tiempo de Vercel — pendiente de correr, ver [[Preguntas-abiertas]].
+- [ ] Automatizar sincronización (pasar de adapter CSV manual a API o BD replica, según lo que se resuelva con VetShipping).
 - [ ] Búsqueda mejorada (full-text de Postgres o motor dedicado si el catálogo lo justifica).
 - [ ] Recompra/suscripción para consumibles (alimento, desparasitantes) — fuerte diferenciador de retención frente a Laika/Animals/Puppis.
 - [ ] WhatsApp para soporte/campañas (canal ya contemplado en el manual de marca).
