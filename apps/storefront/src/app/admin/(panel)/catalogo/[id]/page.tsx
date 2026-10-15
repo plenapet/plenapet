@@ -8,6 +8,7 @@ import {
 import { Badge } from "@plenapet/ui";
 import { Topbar } from "@/components/admin/Topbar";
 import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
+import { ProductImagesField } from "@/components/admin/ProductImagesField";
 import { getCurrentAdmin } from "@/lib/auth/require-admin";
 import {
   updateProductAction,
@@ -281,16 +282,7 @@ export default async function ProductoAdminPage({
             Requiere fórmula / venta con prescripción veterinaria
           </label>
 
-          <div>
-            <label className={labelClass}>Imágenes (una URL por línea)</label>
-            <textarea
-              name="images"
-              defaultValue={(product.images ?? []).join("\n")}
-              rows={3}
-              placeholder="https://.../product-images/..."
-              className={`${inputClass} font-mono text-xs`}
-            />
-          </div>
+          <ProductImagesField existingImages={product.images ?? []} />
 
           <button
             type="submit"

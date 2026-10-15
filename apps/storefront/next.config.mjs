@@ -2,10 +2,10 @@
 const nextConfig = {
   transpilePackages: ["@plenapet/ui", "@plenapet/database", "@plenapet/email"],
   experimental: {
-    // La primera migración de catálogo sube CSV de VetShipping (cientos de
-    // filas, columnas largas como el tsvector de búsqueda) por Server Action.
+    // CSV de VetShipping (cientos de filas) + hasta 5 fotos de producto por
+    // Server Action en la pantalla de edición de catálogo.
     serverActions: {
-      bodySizeLimit: "15mb",
+      bodySizeLimit: "25mb",
     },
   },
 };

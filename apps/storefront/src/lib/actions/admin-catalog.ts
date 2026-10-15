@@ -368,12 +368,41 @@ export async function updateProductAction(formData: FormData) {
   const species = formData.getAll("species").map(String).filter(Boolean);
   const compareAtRaw = String(formData.get("compareAtPesos") ?? "").trim();
   const compareAtPesos = compareAtRaw ? Number(compareAtRaw) : null;
-  const images = String(formData.get("images") ?? "")
-    .split("\n")
-    .map((s) => s.trim())
-    .filter(Boolean);
 
   const supabase = getServiceSupabaseClient();
+
+  // Imágenes: las existentes que no se marcaron "Quitar", más hasta 5 archivos
+  // nuevos subidos al bucket "product-images" (mismo bucket que usa el
+  // importador de VetShipping, pero acá sí son archivos propios de PlenaPet).
+  const existingImages = formData.getAll("existingImages").map(String);
+  const removeUrls = new Set(formData.getAll("removeImages").map(String));
+  const keptImages = existingImages.filter((url) => !removeUrls.has(url));
+
+  const newImageFiles = formData
+    .getAll("newImages")
+    .filter((f): f is File => f instanceof File && f.size > 0)
+    .slice(0, 5 - keptImages.length);
+
+  const uploadErrors: string[] = [];
+  const uploadedUrls: string[] = [];
+  for (const file of newImageFiles) {
+    const ext = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+    const path = `${productId}/${crypto.randomUUID()}.${ext}`;
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const { error: uploadError } = await supabase.storage
+      .from("product-images")
+      .upload(path, buffer, { contentType: file.type || "image/jpeg" });
+
+    if (uploadError) {
+      uploadErrors.push(`${file.name}: ${uploadError.message}`);
+      continue;
+    }
+    const { data: publicUrlData } = supabase.storage.from("product-images").getPublicUrl(path);
+    uploadedUrls.push(publicUrlData.publicUrl);
+  }
+
+  const images = [...keptImages, ...uploadedUrls].slice(0, 5);
+
   const { error } = await supabase
     .from("products")
     .update({
@@ -398,6 +427,14 @@ export async function updateProductAction(formData: FormData) {
 
   if (error) {
     redirect(`${redirectTo}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  if (uploadErrors.length > 0) {
+    redirect(
+      `${redirectTo}?ok=1&error=${encodeURIComponent(
+        `Algunas imágenes no se pudieron subir: ${uploadErrors.join("; ")}`,
+      )}`,
+    );
   }
 
   redirect(`${redirectTo}?ok=1`);
