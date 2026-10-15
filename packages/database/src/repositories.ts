@@ -23,7 +23,13 @@ export interface CategoryRepository {
 
 export interface BrandRepository {
   listAll(): Promise<Brand[]>;
-  getById(id: string): Promise<Brand | null>;
+  /**
+   * `null`/`undefined` cuando un producto importado no tiene marca asignada
+   * (pasa seguido con el catálogo real de VetShipping) — devuelve `null` sin
+   * consultar, nunca enviar eso a Supabase: `.eq("id", null)` no genera
+   * `IS NULL`, genera `id = 'null'` y Postgres revienta (columna uuid).
+   */
+  getById(id: string | null | undefined): Promise<Brand | null>;
 }
 
 export interface OrderRepository {

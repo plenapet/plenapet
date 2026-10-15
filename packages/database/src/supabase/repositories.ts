@@ -58,6 +58,7 @@ export class SupabaseProductRepository implements ProductRepository {
   }
 
   async getById(id: string) {
+    if (!id) return null;
     const { data, error } = await this.client
       .from("products")
       .select("*")
@@ -93,7 +94,8 @@ export class SupabaseBrandRepository implements BrandRepository {
     return (data ?? []).map(mapBrand);
   }
 
-  async getById(id: string) {
+  async getById(id: string | null | undefined) {
+    if (!id) return null;
     const { data, error } = await this.client
       .from("brands")
       .select("*")

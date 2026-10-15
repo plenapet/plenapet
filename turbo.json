@@ -7,7 +7,16 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "NEXT_PUBLIC_SITE_URL",
+        "RESEND_API_KEY",
+        "EMAIL_FROM",
+        "VETSHIPPING_SUPABASE_URL"
+      ]
     },
     "lint": {
       "dependsOn": ["^build"]

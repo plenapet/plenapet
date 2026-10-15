@@ -39,7 +39,8 @@ export class MockBrandRepository implements BrandRepository {
     return brands;
   }
 
-  async getById(id: string) {
+  async getById(id: string | null | undefined) {
+    if (!id) return null;
     return brands.find((b) => b.id === id) ?? null;
   }
 }
